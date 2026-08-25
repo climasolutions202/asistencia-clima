@@ -12,8 +12,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .bg-img-sidebar {
-            /* Aquí actualizamos para que tome tu imagen del técnico */
-            background-image: linear-gradient(rgba(11, 59, 96, 0.7), rgba(11, 59, 96, 0.9)), url('background-image: linear-gradient(...), url('Tecnico.jpeg');');
+            /* CORRECCIÓN: Aquí agregamos la T mayúscula exacta */
+            background-image: linear-gradient(rgba(11, 59, 96, 0.7), rgba(11, 59, 96, 0.9)), url('Tecnico.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -24,7 +24,7 @@
     <!-- Barra de Navegación Superior -->
     <header class="bg-white shadow-sm flex justify-between items-center px-8 py-3">
         <div class="flex items-center">
-            <!-- Aquí actualizamos para que tome tu logo -->
+            <!-- Tu logo que ya funciona -->
             <img src="logo.png" alt="Logo Clima Solutions" class="h-12">
         </div>
         <div class="flex items-center gap-3">
@@ -165,7 +165,6 @@
                     direccionActual = data.display_name;
                 } catch(e) { direccionActual = "Coordenadas obtenidas, dirección en proceso"; }
             }, (error) => {
-                // AQUÍ ESTÁ LA ALERTA DE GPS APAGADO
                 alert("⚠️ ¡IMPORTANTE! Para registrar tu asistencia debes ACTIVAR EL GPS de tu celular y darle a 'Permitir'. Por favor, activa tu ubicación y recarga esta página.");
                 direccionActual = "GPS APAGADO / Denegado por el usuario";
             });
