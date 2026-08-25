@@ -12,7 +12,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .bg-img-sidebar {
-            background-image: linear-gradient(rgba(11, 59, 96, 0.7), rgba(11, 59, 96, 0.9)), url('https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=1000&auto=format&fit=crop');
+            /* Aquí actualizamos para que tome tu imagen del técnico */
+            background-image: linear-gradient(rgba(11, 59, 96, 0.7), rgba(11, 59, 96, 0.9)), url('tecnico.jpg');
             background-size: cover;
             background-position: center;
         }
@@ -23,8 +24,8 @@
     <!-- Barra de Navegación Superior -->
     <header class="bg-white shadow-sm flex justify-between items-center px-8 py-3">
         <div class="flex items-center">
-            <!-- Espacio para tu logo (Reemplazar src con el link real de tu logo) -->
-            <img src="https://via.placeholder.com/150x40?text=Clima+Solutions+Logo" alt="Logo Clima Solutions" class="h-10">
+            <!-- Aquí actualizamos para que tome tu logo -->
+            <img src="logo.png" alt="Logo Clima Solutions" class="h-12">
         </div>
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
@@ -162,10 +163,14 @@
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
                     const data = await res.json();
                     direccionActual = data.display_name;
-                } catch(e) { direccionActual = "Coordenadas obtenidas, dirección no disponible"; }
-            }, () => {
-                direccionActual = "Permiso de ubicación denegado por el usuario";
+                } catch(e) { direccionActual = "Coordenadas obtenidas, dirección en proceso"; }
+            }, (error) => {
+                // AQUÍ ESTÁ LA ALERTA DE GPS APAGADO
+                alert("⚠️ ¡IMPORTANTE! Para registrar tu asistencia debes ACTIVAR EL GPS de tu celular y darle a 'Permitir'. Por favor, activa tu ubicación y recarga esta página.");
+                direccionActual = "GPS APAGADO / Denegado por el usuario";
             });
+        } else {
+            alert("Tu dispositivo no soporta geolocalización.");
         }
 
         // 4. Descargar lista de colaboradores al iniciar
