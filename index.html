@@ -155,21 +155,44 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // 3. Obtener ubicación (GPS) al cargar la página
+        // 3. Obtener ubicación (GPS) en ALTA PRECISIÓN
         if ("geolocation" in navigator) {
+            // Opciones para forzar el GPS exacto del celular
+            const opcionesGPS = {
+                enableHighAccuracy: true, 
+                timeout: 15000, 
+                maximumAge: 0
+            };
+
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 latitudActual = pos.coords.latitude;
                 longitudActual = pos.coords.longitude;
                 // Convertir coordenadas a dirección (Nominatim API)
                 try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
+                    // Agregamos zoom=18 para pedir el máximo nivel de detalle (calle y número si está disponible)
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}&zoom=18&addressdetails=1`);
                     const data = await res.json();
-                    direccionActual = data.display_name;
+                    
+                    // Formatear la dirección para que sea más limpia y precisa
+                    if(data.address) {
+                        const calle = data.address.road || data.address.pedestrian || "";
+                        const numero = data.address.house_number || "";
+                        const distrito = data.address.suburb || data.address.city_district || data.address.town || "";
+                        
+                        if (calle !== "") {
+                            direccionActual = `${calle} ${numero}, ${distrito}`.trim().replace(/,\s*$/, "");
+                        } else {
+                            direccionActual = data.display_name; // Respaldo si no encuentra calle
+                        }
+                    } else {
+                        direccionActual = data.display_name;
+                    }
+                    
                 } catch(e) { direccionActual = "Coordenadas obtenidas, dirección en proceso"; }
             }, (error) => {
                 alert("⚠️ ¡IMPORTANTE! Para registrar tu asistencia debes ACTIVAR EL GPS de tu celular y darle a 'Permitir'. Por favor, activa tu ubicación y recarga esta página.");
                 direccionActual = "GPS APAGADO / Denegado por el usuario";
-            });
+            }, opcionesGPS); // <-- Aquí aplicamos las opciones de alta precisión
         } else {
             alert("Tu dispositivo no soporta geolocalización.");
         }
