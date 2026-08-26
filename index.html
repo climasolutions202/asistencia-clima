@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clima Solutions - Asistencia</title>
-    <!-- Cargamos Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Iconos -->
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         
-        /* NUEVO: Clase de fondo para toda la pantalla */
         .bg-pantalla-completa {
             background-image: linear-gradient(rgba(11, 59, 96, 0.6), rgba(11, 59, 96, 0.85)), url('Tecnico.jpg');
             background-size: cover;
@@ -23,80 +22,86 @@
 <body class="flex flex-col min-h-screen">
 
     <!-- Barra de Navegación Superior -->
-    <header class="bg-white shadow-sm flex justify-between items-center px-8 py-3 z-10">
+    <header class="bg-white shadow-sm flex justify-between items-center px-6 md:px-8 py-3 z-10">
         <div class="flex items-center">
-            <img src="logo.png" alt="Logo Clima Solutions" class="h-12">
+            <img src="logo.png" alt="Logo Clima Solutions" class="h-10 md:h-12">
         </div>
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                <i class="fas fa-user"></i>
-            </div>
-            <div class="text-right hidden sm:block">
-                <p class="text-sm font-semibold text-gray-800">Bienvenido(a)</p>
-                <p class="text-xs text-gray-500">Colaborador</p>
+        <div class="flex items-center gap-3 md:gap-4">
+            <!-- Botón exclusivo para Administradores -->
+            <button onclick="abrirModalAdmin()" 
+                class="flex items-center gap-2 bg-slate-100 hover:bg-[#0B3B60] text-slate-700 hover:text-white px-3 py-2 rounded-lg text-xs md:text-sm font-semibold transition border border-slate-200">
+                <i class="fas fa-lock text-xs"></i> <span>Acceso Admin</span>
+            </button>
+            <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-semibold text-gray-800 leading-tight">Bienvenido(a)</p>
+                    <p class="text-xs text-gray-500">Colaborador</p>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Contenedor Principal (AQUÍ APLICAMOS EL FONDO COMPLETO) -->
+    <!-- Contenedor Principal con Fondo Completo -->
     <main class="flex-1 flex flex-col md:flex-row bg-pantalla-completa">
         
         <!-- Panel Izquierdo (Textos) -->
         <div class="hidden md:flex md:w-1/3 p-10 flex-col justify-end text-white">
-            <h1 class="text-4xl font-bold mb-4">Expertos en sistemas de aire acondicionado,<br><span class="text-green-400">Liderando proyectos de aire acondicionado con los más altos estándares de calidad</span></h1>
+            <h1 class="text-4xl font-bold mb-4">Expertos en sistemas de<br><span class="text-green-400">aire acondicionado.</span></h1>
             <div class="flex items-start gap-3 mt-4">
                 <i class="fas fa-check-circle text-green-400 mt-1 text-xl"></i>
-                <p class="text-sm font-light">Comprometidos con la calidad,<br>la seguridad y el confort.</p>
+                <p class="text-sm font-light">Garantizamos la temperatura ideal con<br>soluciones integrales de climatización.</p>
             </div>
         </div>
 
-        <!-- Panel Derecho (Formulario - Fondo transparente para ver la foto) -->
-        <div class="flex-1 flex items-center justify-center p-6">
-            
-            <!-- Cuadro Blanco del Formulario -->
-            <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+        <!-- Panel Derecho (Formulario) -->
+        <div class="flex-1 flex items-center justify-center p-4 md:p-6">
+            <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-2xl w-full">
                 
                 <!-- Cabecera del Formulario -->
-                <div class="flex justify-between items-start mb-8">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-2xl">
+                <div class="flex justify-between items-start mb-6 md:mb-8">
+                    <div class="flex items-center gap-3 md:gap-4">
+                        <div class="w-12 h-12 md:w-14 md:h-14 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl md:text-2xl">
                             <i class="fas fa-user-clock"></i>
                         </div>
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">Control de Asistencia</h2>
-                            <p class="text-gray-500 text-sm">Acceso interno</p>
+                            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Control de Asistencia</h2>
+                            <p class="text-gray-500 text-xs md:text-sm">Acceso interno</p>
                         </div>
                     </div>
                     <!-- Reloj -->
-                    <div class="bg-green-50 text-green-800 px-4 py-2 rounded-lg flex items-center gap-3 border border-green-100">
-                        <i class="far fa-clock text-xl text-green-600"></i>
+                    <div class="bg-green-50 text-green-800 px-3 md:px-4 py-2 rounded-lg flex items-center gap-2 md:gap-3 border border-green-100">
+                        <i class="far fa-clock text-lg md:text-xl text-green-600"></i>
                         <div>
-                            <p id="fecha-actual" class="text-xs font-semibold">Cargando...</p>
-                            <p id="hora-actual" class="text-lg font-bold">--:--:--</p>
+                            <p id="fecha-actual" class="text-[10px] md:text-xs font-semibold">Cargando...</p>
+                            <p id="hora-actual" class="text-sm md:text-lg font-bold">--:--:--</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Inputs -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Ingresa tu DNI</label>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-2">Ingresa tu DNI</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i class="far fa-id-card"></i>
                             </div>
                             <input type="number" id="dni" placeholder="Ej. 12345678" maxlength="8"
-                                class="w-full pl-10 pr-3 py-3 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none transition text-gray-700 font-medium">
+                                class="w-full pl-10 pr-3 py-3 border border-blue-400 rounded-lg focus:ring-2 focus:ring-blue-600 focus:outline-none transition text-gray-700 font-medium text-sm md:text-base">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre del colaborador</label>
+                        <label class="block text-xs md:text-sm font-medium text-gray-700 mb-2">Nombre del colaborador</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                                 <i class="far fa-user"></i>
                             </div>
                             <input type="text" id="nombre" placeholder="Tu nombre aparecerá aquí" readonly
-                                class="w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed">
+                                class="w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed text-sm md:text-base">
                         </div>
                     </div>
                 </div>
@@ -104,17 +109,17 @@
                 <!-- Botones -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <button id="btn-ingreso" onclick="registrar('Ingreso')" 
-                        class="w-full bg-[#108A29] hover:bg-green-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-green-200 disabled:opacity-50">
+                        class="w-full bg-[#108A29] hover:bg-green-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-green-200 disabled:opacity-50">
                         <i class="fas fa-sign-in-alt"></i> Marcar INGRESO
                     </button>
                     <button id="btn-salida" onclick="registrar('Salida')" 
-                        class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-50">
+                        class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-50">
                         <i class="fas fa-sign-out-alt"></i> Marcar SALIDA
                     </button>
                 </div>
 
                 <!-- Mensaje de Éxito -->
-                <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 animate-fade-in">
+                <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4">
                     <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-check"></i>
                     </div>
@@ -129,23 +134,61 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-[#0B3B60] text-white py-3 px-8 text-sm flex justify-between items-center z-10">
+    <footer class="bg-[#0B3B60] text-white py-3 px-6 md:px-8 text-xs md:text-sm flex justify-between items-center z-10">
         <p>© 2026 Clima Solutions S.A.C. Todos los derechos reservados.</p>
-        <a href="#" class="hover:underline flex items-center gap-2">Soporte <i class="far fa-question-circle"></i></a>
+        <span class="text-blue-200 text-xs">Acceso Operativo</span>
     </footer>
+
+    <!-- MODAL DE LOGIN ADMINISTRATIVO -->
+    <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
+            <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-100 text-[#0B3B60] flex items-center justify-center mx-auto mb-3 text-xl">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">Panel de Administración</h3>
+                <p class="text-xs text-gray-500">Ingreso exclusivo para supervisores</p>
+            </div>
+
+            <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Usuario</label>
+                    <input type="text" id="admin-user" required autocomplete="username"
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="admin">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="admin-pass" required autocomplete="current-password"
+                        class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="••••••••">
+                </div>
+
+                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Usuario o contraseña incorrectos.
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-[#0B3B60] hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
 
     <script>
         // ---------------------------------------------------------
         // 1. CONFIGURACIÓN: REEMPLAZA ESTA URL CON LA TUYA
         // ---------------------------------------------------------
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwlYZDpJhkSvkBcaHg982oPNWhlxZU_R749r05cEo1t44Z3kuc0vFcLdkVYtlQVPq8u/exec';
+        const URL_API = 'AQUI_PEGA_TU_URL_DE_APPS_SCRIPT';
         
         let colaboradoresDB = {};
         let latitudActual = null;
         let longitudActual = null;
         let direccionActual = "Buscando ubicación...";
 
-        // 2. Funciones de Reloj
+        // 2. Reloj
         function actualizarReloj() {
             const ahora = new Date();
             const opcionesFecha = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -155,61 +198,42 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // 3. Obtener ubicación (GPS) en ALTA PRECISIÓN
+        // 3. Obtener ubicación (GPS en alta precisión)
         if ("geolocation" in navigator) {
-            // Opciones para forzar el GPS exacto del celular
-            const opcionesGPS = {
-                enableHighAccuracy: true, 
-                timeout: 15000, 
-                maximumAge: 0
-            };
-
+            const opcionesGPS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 latitudActual = pos.coords.latitude;
                 longitudActual = pos.coords.longitude;
-                // Convertir coordenadas a dirección (Nominatim API)
                 try {
-                    // Agregamos zoom=18 para pedir el máximo nivel de detalle (calle y número si está disponible)
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}&zoom=18&addressdetails=1`);
                     const data = await res.json();
-                    
-                    // Formatear la dirección para que sea más limpia y precisa
                     if(data.address) {
                         const calle = data.address.road || data.address.pedestrian || "";
                         const numero = data.address.house_number || "";
                         const distrito = data.address.suburb || data.address.city_district || data.address.town || "";
-                        
-                        if (calle !== "") {
-                            direccionActual = `${calle} ${numero}, ${distrito}`.trim().replace(/,\s*$/, "");
-                        } else {
-                            direccionActual = data.display_name; // Respaldo si no encuentra calle
-                        }
+                        direccionActual = calle !== "" ? `${calle} ${numero}, ${distrito}`.trim().replace(/,\s*$/, "") : data.display_name;
                     } else {
                         direccionActual = data.display_name;
                     }
-                    
                 } catch(e) { direccionActual = "Coordenadas obtenidas, dirección en proceso"; }
             }, (error) => {
-                alert("⚠️ ¡IMPORTANTE! Para registrar tu asistencia debes ACTIVAR EL GPS de tu celular y darle a 'Permitir'. Por favor, activa tu ubicación y recarga esta página.");
+                alert("⚠️ Para registrar tu asistencia debes activar el GPS y dar permisos de ubicación.");
                 direccionActual = "GPS APAGADO / Denegado por el usuario";
-            }, opcionesGPS); // <-- Aquí aplicamos las opciones de alta precisión
-        } else {
-            alert("Tu dispositivo no soporta geolocalización.");
+            }, opcionesGPS);
         }
 
-        // 4. Descargar lista de colaboradores al iniciar
+        // 4. Cargar colaboradores
         fetch(URL_API)
             .then(res => res.json())
             .then(data => { colaboradoresDB = data; })
             .catch(err => console.log("Error cargando colaboradores", err));
 
-        // 5. Autocompletar nombre
+        // 5. Autocompletar nombre por DNI
         const inputDni = document.getElementById('dni');
         const inputNombre = document.getElementById('nombre');
 
         inputDni.addEventListener('input', function() {
             if (this.value.length > 8) this.value = this.value.slice(0, 8);
-            
             if (this.value.length === 8) {
                 if(colaboradoresDB[this.value]) {
                     inputNombre.value = colaboradoresDB[this.value];
@@ -221,11 +245,11 @@
                 }
             } else {
                 inputNombre.value = "";
-                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed";
+                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed text-sm md:text-base";
             }
         });
 
-        // 6. Función para enviar
+        // 6. Registrar asistencia
         function registrar(tipo) {
             const dni = inputDni.value;
             const nombre = inputNombre.value;
@@ -260,7 +284,7 @@
                 document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
                 inputDni.value = "";
                 inputNombre.value = "";
-                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed";
+                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed text-sm md:text-base";
                 document.getElementById('btn-ingreso').disabled = false;
                 document.getElementById('btn-salida').disabled = false;
                 setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 4000);
@@ -270,6 +294,31 @@
                 document.getElementById('btn-ingreso').disabled = false;
                 document.getElementById('btn-salida').disabled = false;
             });
+        }
+
+        // --- FUNCIONES DEL MODAL DE ADMINISTRADOR ---
+        function abrirModalAdmin() {
+            document.getElementById('modal-admin').classList.remove('hidden');
+            document.getElementById('admin-error').classList.add('hidden');
+            document.getElementById('admin-user').focus();
+        }
+
+        function cerrarModalAdmin() {
+            document.getElementById('modal-admin').classList.add('hidden');
+        }
+
+        function validarLoginAdmin(e) {
+            e.preventDefault();
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
+
+            // Credenciales autorizadas
+            if (user === "admin" && pass === "Clima2026*") {
+                sessionStorage.setItem("clima_auth_admin", "true");
+                window.location.href = "panel-admin-clima.html";
+            } else {
+                document.getElementById('admin-error').classList.remove('hidden');
+            }
         }
     </script>
 </body>
