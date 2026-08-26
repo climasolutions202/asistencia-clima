@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Clima Solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7fb; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        #mapa { height: 400px; width: 100%; z-index: 1; }
+    </style>
+    <!-- Seguridad Rápida -->
+    <script>
+        if (sessionStorage.getItem("clima_auth_admin") !== "true") {
+            alert("⛔ Acceso restringido. Por favor inicia sesión como administrador.");
+            window.location.href = "index.html";
+        }
+    </script>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Izquierdo -->
+    <aside class="w-64 bg-[#0B3B60] text-white flex flex-col hidden md:flex">
+        <div class="p-6 bg-white"><img src="logo.png" alt="Logo" class="h-10"></div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#" class="flex items-center gap-3 bg-blue-600/30 text-white px-4 py-3 rounded-lg border-l-4 border-blue-400 font-semibold"><i class="fas fa-map-marker-alt"></i> Mapa en tiempo real</a>
+        </nav>
+        <div class="p-4 text-xs text-blue-200 opacity-70"><p>Clima Solutions S.A.C.</p><p>Versión 1.0.0</p></div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10 shrink-0">
+            <h1 class="text-xl font-bold text-[#0B3B60]"><i class="fas fa-bars mr-2 md:hidden"></i> Control de Asistencia</h1>
+            <div class="flex items-center gap-4">
+                <button class="text-gray-400"><i class="far fa-bell text-xl"></i></button>
+                <div class="flex items-center gap-3 border-l pl-4 border-gray-200">
+                    <div class="w-8 h-8 rounded-full bg-[#0B3B60] text-white flex items-center justify-center font-bold text-xs">AV</div>
+                    <div class="hidden sm:block text-right">
+                        <p class="text-sm font-bold text-gray-700 leading-tight">Andrea Valdivia</p>
+                        <p class="text-[10px] text-gray-500">Supervisora de Operaciones</p>
+                    </div>
+                    <!-- Botón Cerrar Sesión -->
+                    <button onclick="cerrarSesionAdmin()" class="ml-2 text-red-500 hover:text-red-700 bg-red-50 p-2 rounded" title="Cerrar Sesión">
+                        <i class="fas fa-sign-out-alt"></i> Salir
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard -->
+        <div class="flex-1 overflow-y-auto p-6">
+            <!-- KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl"><i class="fas fa-users"></i></div>
+                    <div><p class="text-xs text-gray-500 font-semibold uppercase">Técnicos Activos</p><h3 class="text-2xl font-bold" id="kpi-activos">0</h3></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-sign-in-alt"></i></div>
+                    <div><p class="text-xs text-gray-500 font-semibold uppercase">Marcaciones hoy</p><h3 class="text-2xl font-bold" id="kpi-marcaciones">0</h3></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center text-xl"><i class="fas fa-map-marker-alt"></i></div>
+                    <div><p class="text-xs text-gray-500 font-semibold uppercase">Ubicaciones</p><h3 class="text-2xl font-bold" id="kpi-ubicaciones">0</h3></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div><p class="text-xs text-gray-500 font-semibold uppercase">Sin GPS</p><h3 class="text-2xl font-bold" id="kpi-incidencias">0</h3></div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 mb-6">
+                <input type="date" id="filtro-fecha" class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none" onchange="cargarDatos()">
+                <button onclick="cargarDatos()" class="bg-blue-50 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100"><i class="fas fa-sync-alt mr-1"></i> Actualizar</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <!-- Mapa -->
+                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
+                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg shadow p-3 z-[400] text-xs font-medium border border-gray-100">
+                        <p class="text-[#0B3B60] font-bold mb-2 border-b pb-1">Leyenda</p>
+                        <p><span class="inline-block w-3 h-3 rounded-full bg-[#108A29] mr-1"></span> Ingreso</p>
+                        <p><span class="inline-block w-3 h-3 rounded-full bg-[#E50014] mr-1"></span> Salida</p>
+                    </div>
+                    <div id="mapa"></div>
+                </div>
+
+                <!-- Lista Lateral -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
+                        <h2 class="font-bold text-[#0B3B60]">Técnicos del día</h2>
+                        <span class="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full font-bold" id="lista-contador">0</span>
+                    </div>
+                    <div class="flex-1 overflow-auto space-y-3 pr-2" id="lista-tecnicos"><div class="text-center text-gray-400 text-sm mt-10">Cargando...</div></div>
+                </div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-4 border-b border-gray-100"><h2 class="font-bold text-[#0B3B60]">Registros <span class="font-normal text-gray-400 text-sm ml-2" id="tabla-contador">0</span></h2></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-[#0B3B60] text-white">
+                            <tr><th class="px-4 py-3">TIPO</th><th class="px-4 py-3">DNI</th><th class="px-4 py-3">TÉCNICO</th><th class="px-4 py-3">HORA</th><th class="px-4 py-3">UBICACIÓN</th><th class="px-4 py-3">MAPS</th></tr>
+                        </thead>
+                        <tbody id="cuerpo-tabla" class="divide-y divide-gray-100 text-gray-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // CERRAR SESIÓN
+        function cerrarSesionAdmin() {
+            sessionStorage.removeItem("clima_auth_admin");
+            window.location.href = "index.html";
+        }
+
+        // PEGA AQUÍ TU URL DE APPS SCRIPT
+        const URL_API = 'AQUI_PEGA_TU_URL_DE_APPS_SCRIPT';
+        let map; let marcadores = [];
+
+        window.onload = function() {
+            map = L.map('mapa').setView([-12.046374, -77.042793], 11);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+            document.getElementById('filtro-fecha').valueAsDate = new Date();
+            cargarDatos();
+        }
+
+        async function cargarDatos() {
+            const fechaInput = document.getElementById('filtro-fecha').value;
+            const partes = fechaInput.split('-');
+            const fechaBuscada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+            
+            document.getElementById("cuerpo-tabla").innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-400">Cargando...</td></tr>';
+            marcadores.forEach(m => map.removeLayer(m)); marcadores = [];
+
+            try {
+                const res = await fetch(URL_API + '?action=registros');
+                const registros = await res.json();
+                
+                let [kTotal, kGPS, kSin, unicos] = [0, 0, 0, new Set()];
+                let htmlT = "", htmlL = "";
+
+                registros.reverse().forEach(reg => {
+                    if (reg.fecha === fechaBuscada) {
+                        kTotal++; unicos.add(reg.dni);
+                        const esIngreso = reg.tipo === 'Ingreso';
+                        const col = esIngreso ? 'text-green-600' : 'text-blue-600';
+                        const bg = esIngreso ? 'bg-[#108A29]' : 'bg-[#E50014]';
+                        const tieneGPS = reg.gps && reg.gps.includes('q=');
+                        if(tieneGPS) kGPS++; else kSin++;
+
+                        htmlT += `<tr class="hover:bg-gray-50"><td class="px-4 py-2 font-semibold ${col}">${reg.tipo}</td><td class="px-4 py-2">${reg.dni}</td><td class="px-4 py-2">${reg.nombre}</td><td class="px-4 py-2">${reg.hora}</td><td class="px-4 py-2 max-w-[250px] truncate" title="${reg.direccion}">${reg.direccion}</td><td class="px-4 py-2 text-blue-500 hover:underline">${tieneGPS ? `<a href="${reg.gps}" target="_blank">Ver</a>` : '-'}</td></tr>`;
+                        htmlL += `<div class="flex justify-between p-3 bg-gray-50 rounded-lg border hover:border-blue-200"><div class="flex items-start gap-3"><div class="w-2 h-2 rounded-full ${bg} mt-1.5"></div><div><p class="text-sm font-bold text-gray-800">${reg.nombre}</p><p class="text-xs text-gray-500">DNI ${reg.dni}</p></div></div><div class="text-right"><p class="text-sm font-bold text-gray-700">${reg.hora}</p></div></div>`;
+
+                        if (tieneGPS) {
+                            const [lat, lon] = reg.gps.split('q=')[1].split(',');
+                            const customIcon = L.divIcon({ className: 'custom-pin', html: `<div style="background-color: ${esIngreso?'#108A29':'#E50014'}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 4px rgba(0,0,0,0.4);"></div>`, iconSize: [16,16], iconAnchor: [8,8] });
+                            const marcador = L.marker([parseFloat(lat), parseFloat(lon)], {icon: customIcon}).bindPopup(`<b>${reg.nombre}</b><br>${reg.tipo} - ${reg.hora}<br><span style="font-size:10px">${reg.direccion}</span>`).addTo(map);
+                            marcadores.push(marcador);
+                        }
+                    }
+                });
+
+                document.getElementById("kpi-marcaciones").innerText = kTotal;
+                document.getElementById("kpi-ubicaciones").innerText = kGPS;
+                document.getElementById("kpi-incidencias").innerText = kSin;
+                document.getElementById("kpi-activos").innerText = unicos.size;
+                document.getElementById("cuerpo-tabla").innerHTML = kTotal > 0 ? htmlT : '<tr><td colspan="6" class="text-center py-4">Sin datos</td></tr>';
+                document.getElementById("lista-tecnicos").innerHTML = kTotal > 0 ? htmlL : '<div class="text-center mt-10">Sin datos</div>';
+
+                if(marcadores.length > 0) map.fitBounds(new L.featureGroup(marcadores).getBounds().pad(0.1));
+            } catch (error) { alert("Error al conectar con la base de datos."); }
+        }
+    </script>
+</body>
+</html>
