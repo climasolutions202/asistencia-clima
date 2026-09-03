@@ -17,11 +17,9 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Cabecera -->
     <header class="bg-white shadow-sm flex justify-between items-center px-6 md:px-8 py-3 z-10">
         <div class="flex items-center"><img src="logo.png" alt="Logo" class="h-10 md:h-12"></div>
         <div class="flex items-center gap-3 md:gap-4">
-            <!-- Botón Login Admin -->
             <button onclick="abrirModalAdmin()" class="flex items-center gap-2 bg-slate-100 hover:bg-[#0B3B60] text-slate-700 hover:text-white px-3 py-2 rounded-lg text-xs md:text-sm font-semibold transition border border-slate-200">
                 <i class="fas fa-lock text-xs"></i> <span>Acceso Admin</span>
             </button>
@@ -131,8 +129,8 @@
     </div>
 
     <script>
-        // --- PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT ---
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwlYZDpJhkSvkBcaHg982oPNWhlxZU_R749r05cEo1t44Z3kuc0vFcLdkVYtlQVPq8u/exec';
+        // AQUÍ ESTÁ TU URL CORRECTA Y FUNCIONANDO
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzCuEF-OjCMPsbyp3hP8oakcObe_Xxjxry3PDQh1sx-dMN-UcY7FtqR6-yvDm27KnoI/exec';
         
         let colaboradoresDB = {};
         let latitudActual = null;
@@ -147,7 +145,6 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // Obtener GPS y Dirección Completa
         if ("geolocation" in navigator) {
             const opcionesGPS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
             navigator.geolocation.getCurrentPosition(async (pos) => {
@@ -164,10 +161,8 @@
             }, opcionesGPS);
         } else { alert("Tu dispositivo no soporta geolocalización."); }
 
-        // Cargar Base de Datos
         fetch(URL_API).then(res => res.json()).then(data => { colaboradoresDB = data; });
 
-        // Autocompletado de DNI
         const inputDni = document.getElementById('dni');
         const inputNombre = document.getElementById('nombre');
 
@@ -187,7 +182,6 @@
             }
         });
 
-        // Registrar Asistencia con GPS OBLIGATORIO
         function registrar(tipo) {
             const dni = inputDni.value;
             const nombre = inputNombre.value;
@@ -196,7 +190,6 @@
                 return alert("Por favor, ingrese un DNI válido.");
             }
 
-            // Validación estricta de GPS
             if (!latitudActual || !longitudActual) {
                 return alert("📍 UBICACIÓN OBLIGATORIA:\n\nNo se detectó tu ubicación. Para registrar asistencia debes encender el GPS de tu celular, darle a 'Permitir' y recargar esta página.");
             }
@@ -221,7 +214,6 @@
             });
         }
 
-        // Funciones del Modal de Administrador
         function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); document.getElementById('admin-error').classList.add('hidden'); }
         function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
         function validarLoginAdmin(e) {
