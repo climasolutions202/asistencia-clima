@@ -36,12 +36,11 @@
         <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10 shrink-0">
             <h1 class="text-xl font-bold text-[#0B3B60]"><i class="fas fa-bars mr-2 md:hidden"></i> Control de Asistencia</h1>
             <div class="flex items-center gap-4">
-                <button class="text-gray-400"><i class="far fa-bell text-xl"></i></button>
                 <div class="flex items-center gap-3 border-l pl-4 border-gray-200">
                     <div class="w-8 h-8 rounded-full bg-[#0B3B60] text-white flex items-center justify-center font-bold text-xs">AV</div>
                     <div class="hidden sm:block text-right">
-                        <p class="text-sm font-bold text-gray-700 leading-tight">Andrea Valdivia</p>
-                        <p class="text-[10px] text-gray-500">Supervisora de Operaciones</p>
+                        <p class="text-sm font-bold text-gray-700 leading-tight">Admin</p>
+                        <p class="text-[10px] text-gray-500">Supervisión</p>
                     </div>
                     <button onclick="cerrarSesionAdmin()" class="ml-2 text-red-500 hover:text-red-700 bg-red-50 p-2 rounded" title="Cerrar Sesión">
                         <i class="fas fa-sign-out-alt"></i> Salir
@@ -114,8 +113,8 @@
             window.location.href = "index.html";
         }
 
-        // AQUÍ ESTÁ TU URL CORRECTA Y FUNCIONANDO
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwlYZDpJhkSvkBcaHg982oPNWhlxZU_R749r05cEo1t44Z3kuc0vFcLdkVYtlQVPq8u/exec';
+        // TU NUEVO ENLACE
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzBrMd7AGfkCxSQCDo14mQUBl3VqCeWROaObRX3rRSh2Q3Dn3zphjFhvTcXLGkyQIPI/exec';
         let map; let marcadores = [];
 
         window.onload = function() {
