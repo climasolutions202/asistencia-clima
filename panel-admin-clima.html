@@ -15,7 +15,6 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         #mapa { height: 400px; width: 100%; z-index: 1; }
     </style>
-    <!-- Seguridad Rápida -->
     <script>
         if (sessionStorage.getItem("clima_auth_admin") !== "true") {
             alert("⛔ Acceso restringido. Por favor inicia sesión como administrador.");
@@ -25,7 +24,6 @@
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Sidebar Izquierdo -->
     <aside class="w-64 bg-[#0B3B60] text-white flex flex-col hidden md:flex">
         <div class="p-6 bg-white"><img src="logo.png" alt="Logo" class="h-10"></div>
         <nav class="flex-1 px-4 py-6 space-y-2">
@@ -35,7 +33,6 @@
     </aside>
 
     <main class="flex-1 flex flex-col overflow-hidden">
-        <!-- Header -->
         <header class="bg-white shadow-sm h-16 flex items-center justify-between px-6 z-10 shrink-0">
             <h1 class="text-xl font-bold text-[#0B3B60]"><i class="fas fa-bars mr-2 md:hidden"></i> Control de Asistencia</h1>
             <div class="flex items-center gap-4">
@@ -46,7 +43,6 @@
                         <p class="text-sm font-bold text-gray-700 leading-tight">Andrea Valdivia</p>
                         <p class="text-[10px] text-gray-500">Supervisora de Operaciones</p>
                     </div>
-                    <!-- Botón Cerrar Sesión -->
                     <button onclick="cerrarSesionAdmin()" class="ml-2 text-red-500 hover:text-red-700 bg-red-50 p-2 rounded" title="Cerrar Sesión">
                         <i class="fas fa-sign-out-alt"></i> Salir
                     </button>
@@ -54,9 +50,7 @@
             </div>
         </header>
 
-        <!-- Dashboard -->
         <div class="flex-1 overflow-y-auto p-6">
-            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-100 flex items-center gap-4">
                     <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl"><i class="fas fa-users"></i></div>
@@ -82,7 +76,6 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <!-- Mapa -->
                 <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
                     <div class="absolute top-4 left-4 bg-white/90 backdrop-blur rounded-lg shadow p-3 z-[400] text-xs font-medium border border-gray-100">
                         <p class="text-[#0B3B60] font-bold mb-2 border-b pb-1">Leyenda</p>
@@ -92,7 +85,6 @@
                     <div id="mapa"></div>
                 </div>
 
-                <!-- Lista Lateral -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col h-[400px]">
                     <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-3">
                         <h2 class="font-bold text-[#0B3B60]">Técnicos del día</h2>
@@ -102,7 +94,6 @@
                 </div>
             </div>
 
-            <!-- Tabla -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-4 border-b border-gray-100"><h2 class="font-bold text-[#0B3B60]">Registros <span class="font-normal text-gray-400 text-sm ml-2" id="tabla-contador">0</span></h2></div>
                 <div class="overflow-x-auto">
@@ -118,14 +109,13 @@
     </main>
 
     <script>
-        // CERRAR SESIÓN
         function cerrarSesionAdmin() {
             sessionStorage.removeItem("clima_auth_admin");
             window.location.href = "index.html";
         }
 
-        // PEGA AQUÍ TU URL DE APPS SCRIPT
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwlYZDpJhkSvkBcaHg982oPNWhlxZU_R749r05cEo1t44Z3kuc0vFcLdkVYtlQVPq8u/exec';
+        // AQUÍ ESTÁ TU URL CORRECTA Y FUNCIONANDO
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzCuEF-OjCMPsbyp3hP8oakcObe_Xxjxry3PDQh1sx-dMN-UcY7FtqR6-yvDm27KnoI/exec';
         let map; let marcadores = [];
 
         window.onload = function() {
