@@ -65,7 +65,7 @@
                 <!-- BANNER DE ESTADO DEL GPS -->
                 <div id="gps-status" class="mb-6 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm transition-all">
                     <i class="fas fa-spinner fa-spin text-lg"></i> 
-                    <span>Ubicando tu calle exacta... Por favor espera.</span>
+                    <span>Ubicando tu dispositivo... Por favor espera.</span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
@@ -152,29 +152,32 @@
         setInterval(actualizarReloj, 1000);
         actualizarReloj();
 
-        // OBTENER GPS Y DIRECCIÓN (A PRUEBA DE FALLOS)
+        // OBTENER GPS CON SISTEMA ANTI-FALLOS
         if ("geolocation" in navigator) {
-            const opcionesGPS = { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 };
+            const opcionesGPS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
             
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 latitudActual = pos.coords.latitude;
                 longitudActual = pos.coords.longitude;
                 
+                // GUARDIA DE SEGURIDAD: Por defecto se guardan las coordenadas numéricas
+                direccionActual = `Lat: ${latitudActual}, Lon: ${longitudActual}`;
+                
                 try {
-                    // Agregamos un correo falso para que OpenStreetMap no bloquee la conexión
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}&zoom=18&addressdetails=1&email=asistencia@climasolutions.com`);
-                    const data = await res.json();
-                    
-                    if(data.display_name) { 
-                        direccionActual = data.display_name; 
-                    } else { 
-                        direccionActual = `Coordenadas: Lat ${latitudActual}, Lon ${longitudActual}`; 
+                    // Intenta traducir a calle
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
+                    if(res.ok) {
+                        const data = await res.json();
+                        if(data.display_name) { 
+                            direccionActual = data.display_name; 
+                        }
                     }
                 } catch(e) { 
-                    direccionActual = `Calle no detectada. Coordenadas: ${latitudActual}, ${longitudActual}`; 
+                    // Si falla silenciosamente, mantiene las coordenadas
+                    console.log("El servicio de calles está saturado."); 
                 }
 
-                // RECIÉN AQUÍ SE DESBLOQUEA TODO (Asegurándonos de que ya tiene la dirección)
+                // DESBLOQUEA LA INTERFAZ
                 inputDni.disabled = false;
                 btnIngreso.disabled = false;
                 btnSalida.disabled = false;
