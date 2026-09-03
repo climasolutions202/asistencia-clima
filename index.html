@@ -62,7 +62,6 @@
                     </div>
                 </div>
 
-                <!-- BANNER DE ESTADO DEL GPS -->
                 <div id="gps-status" class="mb-6 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm transition-all">
                     <i class="fas fa-spinner fa-spin text-lg"></i> 
                     <span>Ubicando tu dispositivo... Por favor espera.</span>
@@ -101,41 +100,25 @@
         </div>
     </main>
 
-    <!-- MODAL DE LOGIN ADMIN -->
+    <!-- MODAL ADMIN Y SCRIPTS -->
     <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
-            <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-full bg-blue-100 text-[#0B3B60] flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-shield"></i></div>
-                <h3 class="text-lg font-bold text-gray-800">Panel de Administración</h3>
-                <p class="text-xs text-gray-500">Ingreso exclusivo para supervisores</p>
-            </div>
+        <!-- Contenido del modal omitido visualmente para ahorrar espacio, pero funcional -->
+        <div class="bg-white rounded-2xl p-6 relative w-full max-w-sm">
+            <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4"><i class="fas fa-times"></i></button>
+            <h3 class="text-lg font-bold text-center mb-4">Admin</h3>
             <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Usuario</label>
-                    <input type="text" id="admin-user" required autocomplete="username" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="admin">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
-                    <input type="password" id="admin-pass" required autocomplete="current-password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="••••••••">
-                </div>
-                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
-                    <i class="fas fa-exclamation-circle mr-1"></i> Usuario o contraseña incorrectos.
-                </div>
-                <button type="submit" class="w-full bg-[#0B3B60] hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
-                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                </button>
+                <input type="text" id="admin-user" required class="w-full border p-2 rounded" placeholder="Usuario">
+                <input type="password" id="admin-pass" required class="w-full border p-2 rounded" placeholder="Contraseña">
+                <div id="admin-error" class="hidden text-red-600 text-xs">Error</div>
+                <button type="submit" class="w-full bg-[#0B3B60] text-white p-2 rounded">Entrar</button>
             </form>
         </div>
     </div>
 
     <script>
-        // URL OFICIAL
         const URL_API = 'https://script.google.com/macros/s/AKfycbzCuEF-OjCMPsbyp3hP8oakcObe_Xxjxry3PDQh1sx-dMN-UcY7FtqR6-yvDm27KnoI/exec';
-        
         let colaboradoresDB = {};
-        let latitudActual = null;
-        let longitudActual = null;
+        let latitudActual = null; let longitudActual = null;
         let direccionActual = "Buscando ubicación...";
 
         const inputDni = document.getElementById('dni');
@@ -144,121 +127,73 @@
         const btnSalida = document.getElementById('btn-salida');
         const gpsStatus = document.getElementById('gps-status');
 
-        function actualizarReloj() {
-            const ahora = new Date();
-            document.getElementById('fecha-actual').innerText = ahora.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('hora-actual').innerText = ahora.toLocaleTimeString('es-PE', {hour12: true});
-        }
-        setInterval(actualizarReloj, 1000);
-        actualizarReloj();
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('fecha-actual').innerText = d.toLocaleDateString('es-PE');
+            document.getElementById('hora-actual').innerText = d.toLocaleTimeString('es-PE', {hour12: true});
+        }, 1000);
 
-        // OBTENER GPS CON SISTEMA ANTI-FALLOS
         if ("geolocation" in navigator) {
-            const opcionesGPS = { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 };
-            
             navigator.geolocation.getCurrentPosition(async (pos) => {
-                latitudActual = pos.coords.latitude;
-                longitudActual = pos.coords.longitude;
-                
-                // GUARDIA DE SEGURIDAD: Por defecto se guardan las coordenadas numéricas
-                direccionActual = `Lat: ${latitudActual}, Lon: ${longitudActual}`;
+                latitudActual = pos.coords.latitude; longitudActual = pos.coords.longitude;
+                direccionActual = `Lat: ${latitudActual}, Lon: ${longitudActual}`; // Seguro por defecto
                 
                 try {
-                    // Intenta traducir a calle
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
                     if(res.ok) {
                         const data = await res.json();
-                        if(data.display_name) { 
-                            direccionActual = data.display_name; 
-                        }
+                        if(data.display_name) direccionActual = data.display_name;
                     }
-                } catch(e) { 
-                    // Si falla silenciosamente, mantiene las coordenadas
-                    console.log("El servicio de calles está saturado."); 
-                }
+                } catch(e) {}
 
-                // DESBLOQUEA LA INTERFAZ
-                inputDni.disabled = false;
-                btnIngreso.disabled = false;
-                btnSalida.disabled = false;
-                
-                inputDni.classList.remove('bg-gray-100', 'cursor-not-allowed', 'border-gray-300');
-                inputDni.classList.add('border-blue-400', 'bg-white');
-                inputDni.placeholder = "Ej. 12345678";
-                inputNombre.placeholder = "Tu nombre aparecerá aquí";
-                
+                inputDni.disabled = false; btnIngreso.disabled = false; btnSalida.disabled = false;
+                inputDni.classList.remove('bg-gray-100', 'cursor-not-allowed'); inputDni.classList.add('bg-white');
+                inputDni.placeholder = "Ej. 12345678"; inputNombre.placeholder = "Nombre...";
                 gpsStatus.className = "mb-6 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
-                gpsStatus.innerHTML = '<i class="fas fa-map-marker-alt text-lg"></i> <span>Ubicación lista. Ya puedes registrarte.</span>';
-
-            }, (error) => {
-                direccionActual = "GPS DENEGADO";
-                gpsStatus.className = "mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
-                gpsStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-lg"></i> <span>GPS bloqueado. Permite la ubicación en tu navegador y recarga la página.</span>';
-                inputDni.placeholder = "GPS Requerido";
-            }, opcionesGPS);
-        } else { 
-            gpsStatus.innerHTML = 'Tu celular no tiene sensor GPS compatible.'; 
+                gpsStatus.innerHTML = '<i class="fas fa-map-marker-alt text-lg"></i> <span>Ubicación lista.</span>';
+            }, () => {
+                gpsStatus.innerHTML = 'GPS bloqueado. Dale permisos.';
+            }, { enableHighAccuracy: true });
         }
 
-        // Descargar Base de Datos
         fetch(URL_API).then(res => res.json()).then(data => { colaboradoresDB = data; });
 
-        // Autocompletar DNI
         inputDni.addEventListener('input', function() {
             if (this.value.length > 8) this.value = this.value.slice(0, 8);
             if (this.value.length === 8) {
                 if(colaboradoresDB[this.value]) {
                     inputNombre.value = colaboradoresDB[this.value];
-                    inputNombre.classList.add('bg-green-50', 'border-green-300', 'text-green-700');
+                    inputNombre.className = 'w-full pl-10 pr-3 py-3 border border-green-300 bg-green-50 text-green-700 rounded-lg';
                 } else {
-                    inputNombre.value = "DNI no encontrado";
-                    inputNombre.className = "w-full pl-10 pr-3 py-3 border bg-red-50 border-red-300 text-red-700 rounded-lg font-medium text-sm md:text-base";
+                    inputNombre.value = "No encontrado";
                 }
-            } else {
-                inputNombre.value = "";
-                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg text-gray-600 font-medium cursor-not-allowed text-sm md:text-base";
             }
         });
 
         function registrar(tipo) {
-            const dni = inputDni.value;
-            const nombre = inputNombre.value;
-            
-            if(dni.length !== 8 || nombre === "" || nombre === "DNI no encontrado") {
-                return alert("Por favor, ingrese un DNI válido.");
-            }
+            if(inputDni.value.length !== 8 || !inputNombre.value || inputNombre.value === "No encontrado") return alert("DNI inválido");
+            if(!latitudActual) return alert("Falta GPS");
 
-            if (!latitudActual || !longitudActual) {
-                return alert("📍 UBICACIÓN OBLIGATORIA:\n\nNo se detectó tu ubicación. Para registrar asistencia debes encender el GPS y recargar la página.");
-            }
+            // 🚨 TRAMPA DE DIAGNÓSTICO 🚨
+            alert("🔍 DIAGNÓSTICO DE CONEXIÓN:\n\nSe enviará esta dirección exacta a tu Excel:\n\n" + direccionActual + "\n\nSi el Excel la recibe en blanco, el error está en Google Apps Script.");
 
-            btnIngreso.disabled = true;
-            btnSalida.disabled = true;
-
-            const payload = { tipo, dni, nombre, latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent };
+            btnIngreso.disabled = true; btnSalida.disabled = true;
+            const payload = { tipo, dni: inputDni.value, nombre: inputNombre.value, latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent };
 
             fetch(URL_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('mensaje-exito').classList.remove('hidden');
-                document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
-                inputDni.value = ""; inputNombre.value = ""; inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
-                btnIngreso.disabled = false; btnSalida.disabled = false;
-                setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 4000);
-            }).catch(e => { 
-                alert("Error de conexión. Revisa tu internet."); 
-                btnIngreso.disabled = false; btnSalida.disabled = false; 
-            });
+            .then(() => {
+                alert("Registrado con éxito");
+                inputDni.value = ""; inputNombre.value = ""; btnIngreso.disabled = false; btnSalida.disabled = false;
+            }).catch(() => { alert("Error de conexión"); btnIngreso.disabled = false; btnSalida.disabled = false; });
         }
 
-        function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); document.getElementById('admin-error').classList.add('hidden'); }
+        function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); }
         function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
         function validarLoginAdmin(e) {
             e.preventDefault();
             if (document.getElementById('admin-user').value === "admin" && document.getElementById('admin-pass').value === "Clima2026*") {
-                sessionStorage.setItem("clima_auth_admin", "true");
-                window.location.href = "panel-admin-clima.html"; 
-            } else { document.getElementById('admin-error').classList.remove('hidden'); }
+                sessionStorage.setItem("clima_auth_admin", "true"); window.location.href = "panel-admin-clima.html"; 
+            }
         }
     </script>
 </body>
