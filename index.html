@@ -89,13 +89,24 @@
                     <button id="btn-salida" disabled onclick="registrar('Salida')" class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-out-alt"></i> Marcar SALIDA</button>
                 </div>
 
-                <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4">
+                <!-- MENSAJE DE ÉXITO -->
+                <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mb-4">
                     <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                     <div>
-                        <h4 class="text-green-800 font-bold">¡Asistencia registrada correctamente!</h4>
+                        <h4 class="text-green-800 font-bold">¡Asistencia registrada!</h4>
                         <p id="mensaje-detalle" class="text-green-600 text-sm">Gracias por registrar tu asistencia.</p>
                     </div>
                 </div>
+
+                <!-- MENSAJE DE ERROR (DUPLICADO) -->
+                <div id="mensaje-error" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 mb-4">
+                    <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div>
+                        <h4 class="text-red-800 font-bold">Marcación Duplicada</h4>
+                        <p id="mensaje-error-detalle" class="text-red-600 text-sm">Ya tienes este registro el día de hoy.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
     </main>
@@ -129,7 +140,6 @@
     </div>
 
     <script>
-        // TU NUEVO ENLACE
         const URL_API = 'https://script.google.com/macros/s/AKfycbzBrMd7AGfkCxSQCDo14mQUBl3VqCeWROaObRX3rRSh2Q3Dn3zphjFhvTcXLGkyQIPI/exec';
         
         let colaboradoresDB = {};
@@ -194,17 +204,33 @@
             if(!latitudActual) return alert("📍 UBICACIÓN OBLIGATORIA:\n\nNo se detectó tu ubicación.");
 
             btnIngreso.disabled = true; btnSalida.disabled = true;
+            
+            // Ocultar mensajes previos
+            document.getElementById('mensaje-exito').classList.add('hidden');
+            document.getElementById('mensaje-error').classList.add('hidden');
+
             const payload = { tipo, dni: inputDni.value, nombre: inputNombre.value, latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent };
 
             fetch(URL_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('mensaje-exito').classList.remove('hidden');
-                document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
-                inputDni.value = ""; inputNombre.value = ""; 
-                inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
-                btnIngreso.disabled = false; btnSalida.disabled = false;
-                setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 4000);
+                if (data.status === "duplicado") {
+                    // Mostrar mensaje rojo de error
+                    document.getElementById('mensaje-error').classList.remove('hidden');
+                    document.getElementById('mensaje-error-detalle').innerText = data.mensaje;
+                    // Reactivar botones
+                    btnIngreso.disabled = false; btnSalida.disabled = false;
+                } else {
+                    // Mostrar mensaje verde de éxito
+                    document.getElementById('mensaje-exito').classList.remove('hidden');
+                    document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
+                    
+                    inputDni.value = ""; inputNombre.value = ""; 
+                    inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
+                    btnIngreso.disabled = false; btnSalida.disabled = false;
+                    
+                    setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
+                }
             }).catch(e => { 
                 alert("Error de conexión. Revisa tu internet."); 
                 btnIngreso.disabled = false; btnSalida.disabled = false; 
