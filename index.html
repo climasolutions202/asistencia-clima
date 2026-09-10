@@ -140,7 +140,7 @@
     </div>
 
     <script>
-        const URL_API = 'https://script.google.com/macros/s/AKfycbwmgYEFL8o0UGGbWlzXTDNSX7q8t6j1V5DPTE_6ccuE25sJ5z_GhqPwVTM5lpojf5E/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzBrMd7AGfkCxSQCDo14mQUBl3VqCeWROaObRX3rRSh2Q3Dn3zphjFhvTcXLGkyQIPI/exec';
         
         let colaboradoresDB = {};
         let latitudActual = null; let longitudActual = null;
@@ -181,7 +181,11 @@
             }, { enableHighAccuracy: true });
         }
 
-        fetch(URL_API).then(res => res.json()).then(data => { colaboradoresDB = data; });
+        // 🛡️ CARGA CON SISTEMA ANTI-CACHÉ (Obliga al celular a descargar datos frescos siempre)
+        fetch(URL_API + '?nocache=' + new Date().getTime())
+            .then(res => res.json())
+            .then(data => { colaboradoresDB = data; })
+            .catch(err => console.error("Error al cargar colaboradores:", err));
 
         inputDni.addEventListener('input', function() {
             if (this.value.length > 8) this.value = this.value.slice(0, 8);
@@ -205,7 +209,6 @@
 
             btnIngreso.disabled = true; btnSalida.disabled = true;
             
-            // Ocultar mensajes previos
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
 
@@ -215,13 +218,10 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === "duplicado") {
-                    // Mostrar mensaje rojo de error
                     document.getElementById('mensaje-error').classList.remove('hidden');
                     document.getElementById('mensaje-error-detalle').innerText = data.mensaje;
-                    // Reactivar botones
                     btnIngreso.disabled = false; btnSalida.disabled = false;
                 } else {
-                    // Mostrar mensaje verde de éxito
                     document.getElementById('mensaje-exito').classList.remove('hidden');
                     document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
                     
