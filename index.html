@@ -140,9 +140,31 @@
     </div>
 
     <script>
-        const URL_API = 'Pero esta nueva implementaaion tiene otro link https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
         
-        let colaboradoresDB = {};
+        const colaboradoresDB = {
+            "71327636": "LUIS ATENCIO",
+            "75508088": "BRANDO CAIRAMPOMA",
+            "41161747": "ALEXIS CORTEZ",
+            "06268184": "FABIAN FIGUEROA",
+            "47066523": "JUAN KISE",
+            "01811361": "MILAGROS MARTINEZ",
+            "43446658": "OMAR MATTASOGLIO",
+            "75911963": "KATHIA MENDOZA",
+            "73311533": "GIOVANNA OBREGON",
+            "72474094": "LEANDRO ORTIZ",
+            "72098343": "JESUS RAMOS",
+            "41064502": "ANGEL SILVA",
+            "73089505": "JHON SUAZO",
+            "75846153": "ROXANA SUCA",
+            "42828195": "EDUARDO VALENZUELA",
+            "72313088": "VALERI MORA",
+            "07211400": "JESUS PIZANO",
+            "42837163": "SHIRLEY OSCCO",
+            "72012494": "NAYELI GUERREROS",
+            "75526744": "LIZET RODRIGUEZ"
+        };
+
         let latitudActual = null; let longitudActual = null;
         let direccionActual = "Buscando ubicación...";
 
@@ -180,12 +202,6 @@
                 gpsStatus.innerHTML = 'GPS bloqueado. Dale permisos en tu navegador.';
             }, { enableHighAccuracy: true });
         }
-
-        // 🛡️ CARGA CON SISTEMA ANTI-CACHÉ (Obliga al celular a descargar datos frescos siempre)
-        fetch(URL_API + '?nocache=' + new Date().getTime())
-            .then(res => res.json())
-            .then(data => { colaboradoresDB = data; })
-            .catch(err => console.error("Error al cargar colaboradores:", err));
 
         inputDni.addEventListener('input', function() {
             if (this.value.length > 8) this.value = this.value.slice(0, 8);
