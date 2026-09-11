@@ -110,19 +110,19 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: MARCACIONES DE HOY -->
+            <!-- SECCIÓN: ÚLTIMAS MARCACIONES -->
             <div class="bg-white rounded-2xl shadow-xl p-5 md:p-6 max-w-2xl w-full border border-slate-100">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full bg-blue-50 text-[#0B3B60] flex items-center justify-center font-bold"><i class="fas fa-clock text-sm"></i></div>
                         <div>
-                            <h3 class="font-bold text-slate-800 text-sm md:text-base">Marcaciones de hoy</h3>
-                            <p class="text-[11px] text-slate-400">Desliza hacia abajo para ver todos los registros</p>
+                            <h3 class="font-bold text-slate-800 text-sm md:text-base">Últimos Registros</h3>
+                            <p class="text-[11px] text-slate-400">Desliza para ver el historial reciente</p>
                         </div>
                     </div>
-                    <!-- Contador visual de marcaciones -->
+                    <!-- Contador fijo -->
                     <div class="text-[11px] font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100" id="contador-marcaciones">
-                        0 marcaciones
+                        15 recientes
                     </div>
                 </div>
                 
@@ -132,13 +132,12 @@
                             <tr>
                                 <th class="px-3 py-3">ESTADO</th>
                                 <th class="px-3 py-3">TÉCNICO</th>
-                                <th class="px-3 py-3">DNI (últimos 4)</th>
-                                <th class="px-3 py-3 text-right">HORA</th>
+                                <th class="px-3 py-3">FECHA Y HORA</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-marcaciones-hoy" class="divide-y divide-slate-100 bg-white">
                             <tr>
-                                <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando marcaciones...</td>
+                                <td colspan="3" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando marcaciones...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -146,34 +145,6 @@
             </div>
         </div>
     </main>
-
-    <!-- MODAL ADMIN -->
-    <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
-            <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 rounded-full bg-blue-100 text-[#0B3B60] flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-shield"></i></div>
-                <h3 class="text-lg font-bold text-gray-800">Panel de Administración</h3>
-                <p class="text-xs text-gray-500">Ingreso exclusivo para supervisores</p>
-            </div>
-            <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Usuario</label>
-                    <input type="text" id="admin-user" required autocomplete="username" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="admin">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
-                    <input type="password" id="admin-pass" required autocomplete="current-password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="••••••••">
-                </div>
-                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
-                    <i class="fas fa-exclamation-circle mr-1"></i> Usuario o contraseña incorrectos.
-                </div>
-                <button type="submit" class="w-full bg-[#0B3B60] hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
-                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                </button>
-            </form>
-        </div>
-    </div>
 
     <script>
         const URL_API = 'https://script.google.com/macros/s/AKfycbxz0W82J83YT2BEITU3PC6DC-tPJ4JQvN_O_ZIQbUCOX55Dn84GWTBe4gD9d1C235oA/exec';
@@ -189,27 +160,13 @@
         };
 
         let latitudActual = null; let longitudActual = null; let direccionActual = "Buscando ubicación...";
-        let cacheRegistrosHoy = []; 
+        let cacheRegistrosGenerales = []; // Todos los registros recientes
 
         const inputDni = document.getElementById('dni');
         const inputNombre = document.getElementById('nombre');
         const btnIngreso = document.getElementById('btn-ingreso');
         const btnSalida = document.getElementById('btn-salida');
         const gpsStatus = document.getElementById('gps-status');
-
-        // 🛡️ NORMALIZADOR DE FECHAS (Elimina ceros a la izquierda para que el cruce con Excel sea perfecto)
-        function normalizarFecha(f) {
-            if (!f) return "";
-            let p = String(f).trim().split(/[-/]/);
-            if (p.length === 3) return parseInt(p[0]) + "/" + parseInt(p[1]) + "/" + p[2];
-            return String(f).trim();
-        }
-
-        // Fecha de hoy limpia (ej. "11/9/2026")
-        function obtenerFechaHoy() {
-            const d = new Date();
-            return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
-        }
 
         setInterval(() => {
             document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-PE');
@@ -255,71 +212,79 @@
             verificarBotones();
         });
 
-        // Habilitador inteligente de botones
+        // 🔥 NUEVA LÓGICA DE BOTONES: Busca tu ÚLTIMO movimiento, sin importar la fecha estricta
         function verificarBotones() {
             const dniVal = String(inputDni.value).trim();
             btnIngreso.disabled = true; btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
             btnSalida.disabled = true; btnSalida.classList.add('opacity-40', 'cursor-not-allowed');
 
             if (dniVal.length === 8 && colaboradoresDB[dniVal] && latitudActual) {
-                let yaMarcoIng = false; 
-                let yaMarcoSal = false;
                 
-                cacheRegistrosHoy.forEach(r => {
-                    const rDni = String(r.dni).trim();
-                    const rFecha = normalizarFecha(r.fecha); // Alinea la fecha a un formato común
-                    const rTipo = String(r.tipo).toLowerCase().trim();
+                // Filtra solo los registros de ESTE trabajador
+                const registrosDelTecnico = cacheRegistrosGenerales.filter(r => String(r.dni).trim() === dniVal);
+                
+                let esDeHoy = false;
+                let ultimoTipo = null;
 
-                    if (rDni === dniVal && rFecha === obtenerFechaHoy()) {
-                        if (rTipo === "ingreso") yaMarcoIng = true;
-                        if (rTipo === "salida") yaMarcoSal = true;
+                if (registrosDelTecnico.length > 0) {
+                    // Obtiene su movimiento más reciente en la historia
+                    const ultimoRegistro = registrosDelTecnico[registrosDelTecnico.length - 1];
+                    ultimoTipo = String(ultimoRegistro.tipo).toLowerCase().trim();
+                    
+                    // Comprobación relajada: ¿Ese último registro tiene el día y año de hoy?
+                    const fechaStr = String(ultimoRegistro.fecha);
+                    const diaHoy = String(new Date().getDate());
+                    const anioHoy = String(new Date().getFullYear());
+                    
+                    if (fechaStr.includes(diaHoy) && fechaStr.includes(anioHoy)) {
+                        esDeHoy = true;
                     }
-                });
+                }
 
-                if (!yaMarcoIng) { 
+                if (!esDeHoy) { 
+                    // Si no tiene registros hoy -> Habilitar INGRESO
                     btnIngreso.disabled = false; 
                     btnIngreso.classList.remove('opacity-40', 'cursor-not-allowed'); 
-                }
-                
-                if (yaMarcoIng && !yaMarcoSal) { 
-                    btnSalida.disabled = false; 
-                    btnSalida.classList.remove('opacity-40', 'cursor-not-allowed'); 
+                } else {
+                    // Si TIENE registros hoy...
+                    if (ultimoTipo === "ingreso") {
+                        // Lo último fue Ingreso -> Habilitar SALIDA
+                        btnSalida.disabled = false; 
+                        btnSalida.classList.remove('opacity-40', 'cursor-not-allowed'); 
+                    }
+                    // Si lo último fue "salida", ambos se quedan bloqueados
                 }
             }
         }
 
+        // 🔥 NUEVA LÓGICA DE TABLA: Muestra los últimos 15 de la lista sin filtros
         function cargarMarcacionesHoy() {
             fetch(URL_API + '?nocache=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
-                    cacheRegistrosHoy = data; 
+                    cacheRegistrosGenerales = data; 
                     verificarBotones(); 
                     
                     const tbody = document.getElementById('tabla-marcaciones-hoy');
                     tbody.innerHTML = '';
                     
-                    // Filtrar asegurando que el cruce de fechas sea a prueba de balas
-                    const deHoy = data.filter(item => normalizarFecha(item.fecha) === obtenerFechaHoy()).reverse();
+                    // Tomamos literalmente los últimos 15 registros de la hoja (los más recientes)
+                    const ultimos15 = data.slice(-15).reverse();
 
-                    document.getElementById('contador-marcaciones').innerText = `${deHoy.length} marcaciones`;
-
-                    if(deHoy.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400">Aún no hay marcaciones registradas hoy.</td></tr>`;
+                    if(ultimos15.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400">El sistema está vacío.</td></tr>`;
                         return;
                     }
 
-                    deHoy.forEach(item => {
-                        const tipoLower = String(item.tipo).toLowerCase().trim();
-                        const esIngreso = tipoLower === "ingreso";
+                    ultimos15.forEach(item => {
+                        const esIngreso = String(item.tipo).toLowerCase().trim() === "ingreso";
                         const badgeColor = esIngreso ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
-                        const dniOculto = "****" + String(item.dni).slice(-4);
                         
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 transition";
                         tr.innerHTML = `<td class="px-3 py-3 border-b border-slate-100"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${badgeColor}">${item.tipo}</span></td>
                                         <td class="px-3 py-3 font-semibold text-slate-700 text-xs border-b border-slate-100">${item.nombre}</td>
-                                        <td class="px-3 py-3 text-slate-500 font-mono text-xs border-b border-slate-100">${dniOculto}</td>
-                                        <td class="px-3 py-3 text-right font-medium text-slate-600 text-xs border-b border-slate-100">${item.hora}</td>`;
+                                        <td class="px-3 py-3 text-slate-500 text-[11px] border-b border-slate-100">${item.fecha} - ${item.hora}</td>`;
                         tbody.appendChild(tr);
                     });
                 })
@@ -337,7 +302,7 @@
 
             const payload = { 
                 tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
-                fecha: obtenerFechaHoy(), // Envía la fecha normalizada
+                fecha: new Date().toLocaleDateString('es-PE'),
                 hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
@@ -358,6 +323,7 @@
             }).catch(e => { alert("Error de conexión. Revisa tu internet."); verificarBotones(); });
         }
 
+        // Lógica de Modal omitida para limpieza, si la usas, aquí está:
         function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); document.getElementById('admin-error').classList.add('hidden'); }
         function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
         function validarLoginAdmin(e) {
