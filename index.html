@@ -89,7 +89,6 @@
                     <button id="btn-salida" disabled onclick="registrar('Salida')" class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-out-alt"></i> Marcar SALIDA</button>
                 </div>
 
-                <!-- MENSAJE DE ÉXITO -->
                 <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mb-4">
                     <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                     <div>
@@ -98,7 +97,6 @@
                     </div>
                 </div>
 
-                <!-- MENSAJE DE ERROR -->
                 <div id="mensaje-error" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 mb-4">
                     <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-exclamation-triangle"></i></div>
                     <div>
@@ -170,34 +168,21 @@
     </div>
 
     <script>
-        const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
+        // NUEVO ENLACE IMPLEMENTADO CORRECTAMENTE
+        const URL_API = 'https://script.google.com/macros/s/AKfycbxz0W82J83YT2BEITU3PC6DC-tPJ4JQvN_O_ZIQbUCOX55Dn84GWTBe4gD9d1C235oA/exec';
         
         const colaboradoresDB = {
-            "71327636": "LUIS ATENCIO",
-            "75508088": "BRANDO CAIRAMPOMA",
-            "41161747": "ALEXIS CORTEZ",
-            "06268184": "FABIAN FIGUEROA",
-            "47066523": "JUAN KISE",
-            "01811361": "MILAGROS MARTINEZ",
-            "43446658": "OMAR MATTASOGLIO",
-            "75911963": "KATHIA MENDOZA",
-            "73311533": "GIOVANNA OBREGON",
-            "72474094": "LEANDRO ORTIZ",
-            "72098343": "JESUS RAMOS",
-            "41064502": "ANGEL SILVA",
-            "73089505": "JHON SUAZO",
-            "75846153": "ROXANA SUCA",
-            "42828195": "EDUARDO VALENZUELA",
-            "72313088": "VALERI MORA",
-            "07211400": "JESUS PIZANO",
-            "42837163": "SHIRLEY OSCCO",
-            "72012494": "NAYELI GUERREROS",
-            "75526744": "LIZET RODRIGUEZ"
+            "71327636": "LUIS ATENCIO", "75508088": "BRANDO CAIRAMPOMA", "41161747": "ALEXIS CORTEZ",
+            "06268184": "FABIAN FIGUEROA", "47066523": "JUAN KISE", "01811361": "MILAGROS MARTINEZ",
+            "43446658": "OMAR MATTASOGLIO", "75911963": "KATHIA MENDOZA", "73311533": "GIOVANNA OBREGON",
+            "72474094": "LEANDRO ORTIZ", "72098343": "JESUS RAMOS", "41064502": "ANGEL SILVA",
+            "73089505": "JHON SUAZO", "75846153": "ROXANA SUCA", "42828195": "EDUARDO VALENZUELA",
+            "72313088": "VALERI MORA", "07211400": "JESUS PIZANO", "42837163": "SHIRLEY OSCCO",
+            "72012494": "NAYELI GUERREROS", "75526744": "LIZET RODRIGUEZ"
         };
 
-        let latitudActual = null; let longitudActual = null;
-        let direccionActual = "Buscando ubicación...";
-        let cacheRegistrosHoy = []; // Guarda las marcaciones para bloquear botones inteligentemente
+        let latitudActual = null; let longitudActual = null; let direccionActual = "Buscando ubicación...";
+        let cacheRegistrosHoy = []; 
 
         const inputDni = document.getElementById('dni');
         const inputNombre = document.getElementById('nombre');
@@ -205,10 +190,17 @@
         const btnSalida = document.getElementById('btn-salida');
         const gpsStatus = document.getElementById('gps-status');
 
-        setInterval(() => {
+        // Formateador estricto para asegurar coincidencia de fechas
+        function obtenerFechaEstricta() {
             const d = new Date();
-            document.getElementById('fecha-actual').innerText = d.toLocaleDateString('es-PE');
-            document.getElementById('hora-actual').innerText = d.toLocaleTimeString('es-PE', {hour12: true});
+            const dia = String(d.getDate()).padStart(2, '0');
+            const mes = String(d.getMonth() + 1).padStart(2, '0');
+            return `${dia}/${mes}/${d.getFullYear()}`;
+        }
+
+        setInterval(() => {
+            document.getElementById('fecha-actual').innerText = obtenerFechaEstricta();
+            document.getElementById('hora-actual').innerText = new Date().toLocaleTimeString('es-PE', {hour12: true});
         }, 1000);
 
         if ("geolocation" in navigator) {
@@ -218,10 +210,7 @@
                 
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
-                    if(res.ok) {
-                        const data = await res.json();
-                        if(data.display_name) direccionActual = data.display_name;
-                    }
+                    if(res.ok) { const data = await res.json(); if(data.display_name) direccionActual = data.display_name; }
                 } catch(e) {}
 
                 inputDni.disabled = false; 
@@ -238,7 +227,6 @@
 
         inputDni.addEventListener('input', function() {
             if (this.value.length > 8) this.value = this.value.slice(0, 8);
-            
             if (this.value.length === 8) {
                 if(colaboradoresDB[this.value]) {
                     inputNombre.value = colaboradoresDB[this.value];
@@ -254,10 +242,8 @@
             verificarBotones();
         });
 
-        // Habilita o deshabilita botones según si ya marcaron hoy
         function verificarBotones() {
             const dniVal = inputDni.value.trim();
-            
             btnIngreso.disabled = true; btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
             btnSalida.disabled = true; btnSalida.classList.add('opacity-40', 'cursor-not-allowed');
 
@@ -265,6 +251,7 @@
                 let yaMarcoIng = false; let yaMarcoSal = false;
                 
                 cacheRegistrosHoy.forEach(r => {
+                    // Ahora la comparación es exacta porque la fecha viene limpia del servidor
                     if (r.dni === dniVal) {
                         if (r.tipo === "Ingreso") yaMarcoIng = true;
                         if (r.tipo === "Salida") yaMarcoSal = true;
@@ -276,12 +263,14 @@
             }
         }
 
-        // Carga la tabla y la lista interna de validación
         function cargarMarcacionesHoy() {
             fetch(URL_API + '?nocache=' + new Date().getTime())
-                .then(res => res.json())
+                .then(res => {
+                    if(!res.ok) throw new Error("Error de permisos de red");
+                    return res.json();
+                })
                 .then(data => {
-                    cacheRegistrosHoy = data; // Data ya viene filtrada de HOY por el Apps Script
+                    cacheRegistrosHoy = data; 
                     verificarBotones();
                     
                     const tbody = document.getElementById('tabla-marcaciones-hoy');
@@ -292,76 +281,56 @@
                         return;
                     }
 
-                    // Invertir para mostrar los últimos arriba, y cortar en 10
-                    const ultimos = data.slice().reverse().slice(0, 10);
-                    
-                    ultimos.forEach(item => {
+                    // Los datos ya vienen filtrados del servidor, solo mostramos los últimos 10
+                    const ultimos10 = data.slice().reverse().slice(0, 10);
+                    ultimos10.forEach(item => {
                         const esIngreso = item.tipo === "Ingreso";
                         const badgeColor = esIngreso ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
                         const dniOculto = "****" + String(item.dni).slice(-4);
-
                         const tr = document.createElement('tr');
-                        tr.className = "hover:bg-slate-50 transition";
-                        tr.innerHTML = `
-                            <td class="px-3 py-2.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${badgeColor}">${item.tipo}</span></td>
-                            <td class="px-3 py-2.5 font-semibold text-slate-700">${item.nombre}</td>
-                            <td class="px-3 py-2.5 text-slate-500 font-mono">${dniOculto}</td>
-                            <td class="px-3 py-2.5 text-right font-medium text-slate-600">${item.hora}</td>
-                        `;
+                        tr.innerHTML = `<td class="px-3 py-2.5"><span class="px-2.5 py-1 rounded-full text-[10px] font-bold border ${badgeColor}">${item.tipo}</span></td>
+                                        <td class="px-3 py-2.5 font-semibold text-slate-700">${item.nombre}</td>
+                                        <td class="px-3 py-2.5 text-slate-500 font-mono">${dniOculto}</td>
+                                        <td class="px-3 py-2.5 text-right font-medium text-slate-600">${item.hora}</td>`;
                         tbody.appendChild(tr);
                     });
                 })
                 .catch(err => {
-                    console.log("Cargando...", err);
+                    console.error("Fallo al descargar", err);
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-red-500 font-bold">⚠️ Error: Revisa tu conexión a internet o los permisos.</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
-        setInterval(cargarMarcacionesHoy, 10000);
+        setInterval(cargarMarcacionesHoy, 15000); // Actualiza cada 15 segundos
 
         function registrar(tipo) {
-            if(inputDni.value.length !== 8 || !inputNombre.value || inputNombre.value === "DNI no encontrado") return alert("Por favor, ingrese un DNI válido.");
-            if(!latitudActual) return alert("📍 UBICACIÓN OBLIGATORIA:\n\nNo se detectó tu ubicación.");
-
+            if(inputDni.value.length !== 8 || !inputNombre.value) return alert("Ingrese un DNI válido.");
             btnIngreso.disabled = true; btnSalida.disabled = true;
-            
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
 
-            const payload = { tipo, dni: inputDni.value, nombre: inputNombre.value, latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent };
+            const payload = { 
+                tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
+                fecha: obtenerFechaEstricta(),
+                hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
+                latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
+            };
 
-            // Se envía con un POST normal para que la respuesta JSON se lea sin bloqueos
             fetch(URL_API, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
             .then(res => res.json())
             .then(data => {
                 if (data.status === "duplicado") {
                     document.getElementById('mensaje-error').classList.remove('hidden');
                     document.getElementById('mensaje-error-detalle').innerText = data.mensaje;
-                    cargarMarcacionesHoy(); // Forzamos actualización de botones
                 } else {
                     document.getElementById('mensaje-exito').classList.remove('hidden');
-                    document.getElementById('mensaje-detalle').innerText = `Tu ${tipo.toLowerCase()} ha sido registrado exitosamente.`;
-                    
                     inputDni.value = ""; inputNombre.value = ""; 
                     inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
-                    
-                    cargarMarcacionesHoy();
-                    
                     setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
                 }
-            }).catch(e => { 
-                alert("Error de conexión. Revisa tu internet."); 
-                verificarBotones();
-            });
-        }
-
-        function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); document.getElementById('admin-error').classList.add('hidden'); }
-        function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
-        function validarLoginAdmin(e) {
-            e.preventDefault();
-            if (document.getElementById('admin-user').value === "admin" && document.getElementById('admin-pass').value === "Clima2026*") {
-                sessionStorage.setItem("clima_auth_admin", "true"); window.location.href = "panel-admin-clima.html"; 
-            } else { document.getElementById('admin-error').classList.remove('hidden'); }
+                cargarMarcacionesHoy();
+            }).catch(e => { alert("Error de conexión. Revisa tu internet."); verificarBotones(); });
         }
     </script>
 </body>
