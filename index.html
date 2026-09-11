@@ -13,7 +13,6 @@
             background-image: linear-gradient(rgba(11, 59, 96, 0.6), rgba(11, 59, 96, 0.85)), url('Tecnico.jpg');
             background-size: cover; background-position: center;
         }
-        /* Personalizar la barra de scroll de la tabla */
         .tabla-scroll::-webkit-scrollbar { width: 6px; }
         .tabla-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 8px; }
         .tabla-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
@@ -127,10 +126,8 @@
                     </div>
                 </div>
                 
-                <!-- CONTENEDOR CON BARRA DE SCROLL -->
                 <div class="overflow-x-auto overflow-y-auto max-h-64 border border-slate-200 rounded-xl relative shadow-inner tabla-scroll">
                     <table class="w-full text-left text-xs md:text-sm">
-                        <!-- ENCABEZADO PEGAJOSO -->
                         <thead class="bg-[#0B3B60] text-white sticky top-0 z-10 shadow-md">
                             <tr>
                                 <th class="px-3 py-3">ESTADO</th>
@@ -200,15 +197,22 @@
         const btnSalida = document.getElementById('btn-salida');
         const gpsStatus = document.getElementById('gps-status');
 
-        function obtenerFechaEstricta() {
+        // 🛡️ NORMALIZADOR DE FECHAS (Elimina ceros a la izquierda para que el cruce con Excel sea perfecto)
+        function normalizarFecha(f) {
+            if (!f) return "";
+            let p = String(f).trim().split(/[-/]/);
+            if (p.length === 3) return parseInt(p[0]) + "/" + parseInt(p[1]) + "/" + p[2];
+            return String(f).trim();
+        }
+
+        // Fecha de hoy limpia (ej. "11/9/2026")
+        function obtenerFechaHoy() {
             const d = new Date();
-            const dia = String(d.getDate()).padStart(2, '0');
-            const mes = String(d.getMonth() + 1).padStart(2, '0');
-            return `${dia}/${mes}/${d.getFullYear()}`;
+            return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
         }
 
         setInterval(() => {
-            document.getElementById('fecha-actual').innerText = obtenerFechaEstricta();
+            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-PE');
             document.getElementById('hora-actual').innerText = new Date().toLocaleTimeString('es-PE', {hour12: true});
         }, 1000);
 
@@ -251,7 +255,7 @@
             verificarBotones();
         });
 
-        // 🛡️ Lógica blindada para activar/desactivar botones de Ingreso y Salida
+        // Habilitador inteligente de botones
         function verificarBotones() {
             const dniVal = String(inputDni.value).trim();
             btnIngreso.disabled = true; btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
@@ -263,22 +267,20 @@
                 
                 cacheRegistrosHoy.forEach(r => {
                     const rDni = String(r.dni).trim();
-                    const rFecha = String(r.fecha).trim();
-                    const rTipo = String(r.tipo).toLowerCase().trim(); // Convertir a minúsculas por seguridad
+                    const rFecha = normalizarFecha(r.fecha); // Alinea la fecha a un formato común
+                    const rTipo = String(r.tipo).toLowerCase().trim();
 
-                    if (rDni === dniVal && rFecha === obtenerFechaEstricta()) {
+                    if (rDni === dniVal && rFecha === obtenerFechaHoy()) {
                         if (rTipo === "ingreso") yaMarcoIng = true;
                         if (rTipo === "salida") yaMarcoSal = true;
                     }
                 });
 
-                // Si no ha marcado ingreso -> Habilitar Marcar INGRESO
                 if (!yaMarcoIng) { 
                     btnIngreso.disabled = false; 
                     btnIngreso.classList.remove('opacity-40', 'cursor-not-allowed'); 
                 }
                 
-                // Si YA marcó ingreso pero aún NO marca salida -> Habilitar Marcar SALIDA
                 if (yaMarcoIng && !yaMarcoSal) { 
                     btnSalida.disabled = false; 
                     btnSalida.classList.remove('opacity-40', 'cursor-not-allowed'); 
@@ -291,14 +293,14 @@
                 .then(res => res.json())
                 .then(data => {
                     cacheRegistrosHoy = data; 
-                    verificarBotones(); // Evaluamos de inmediato qué botones encender
+                    verificarBotones(); 
                     
                     const tbody = document.getElementById('tabla-marcaciones-hoy');
                     tbody.innerHTML = '';
                     
-                    const deHoy = data.filter(item => String(item.fecha).trim() === obtenerFechaEstricta()).reverse();
+                    // Filtrar asegurando que el cruce de fechas sea a prueba de balas
+                    const deHoy = data.filter(item => normalizarFecha(item.fecha) === obtenerFechaHoy()).reverse();
 
-                    // Actualizar el contador
                     document.getElementById('contador-marcaciones').innerText = `${deHoy.length} marcaciones`;
 
                     if(deHoy.length === 0) {
@@ -306,7 +308,6 @@
                         return;
                     }
 
-                    // Ahora se muestran TODOS, sin límite, y se puede bajar con el scroll
                     deHoy.forEach(item => {
                         const tipoLower = String(item.tipo).toLowerCase().trim();
                         const esIngreso = tipoLower === "ingreso";
@@ -322,9 +323,7 @@
                         tbody.appendChild(tr);
                     });
                 })
-                .catch(err => {
-                    console.error("Fallo al descargar", err);
-                });
+                .catch(err => console.error("Fallo al descargar", err));
         }
 
         cargarMarcacionesHoy();
@@ -338,7 +337,7 @@
 
             const payload = { 
                 tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
-                fecha: obtenerFechaEstricta(),
+                fecha: obtenerFechaHoy(), // Envía la fecha normalizada
                 hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
@@ -355,7 +354,7 @@
                     inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
                     setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
                 }
-                cargarMarcacionesHoy(); // Esto refrescará la tabla y evaluará los botones de nuevo
+                cargarMarcacionesHoy();
             }).catch(e => { alert("Error de conexión. Revisa tu internet."); verificarBotones(); });
         }
 
