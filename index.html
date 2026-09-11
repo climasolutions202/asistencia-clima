@@ -255,7 +255,6 @@
             verificarEstadoBotones();
         });
 
-        // 🛡️ BLOQUEO INTELIGENTE DE BOTONES SI YA MARCÓ HOY
         function verificarEstadoBotones() {
             const dniVal = inputDni.value.trim();
             const fechaHoy = new Date().toLocaleDateString('es-PE');
@@ -272,7 +271,6 @@
                 });
             }
 
-            // Control de Botón Ingreso
             if (dniVal.length === 8 && colaboradoresDB[dniVal] && !yaMarcoIngreso && latitudActual) {
                 btnIngreso.disabled = false;
                 btnIngreso.classList.remove('opacity-40', 'cursor-not-allowed');
@@ -281,7 +279,6 @@
                 btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
             }
 
-            // Control de Botón Salida
             if (dniVal.length === 8 && colaboradoresDB[dniVal] && yaMarcoIngreso && !yaMarcoSalida && latitudActual) {
                 btnSalida.disabled = false;
                 btnSalida.classList.remove('opacity-40', 'cursor-not-allowed');
@@ -292,7 +289,7 @@
         }
 
         function cargarMarcacionesHoy() {
-            fetch(URL_API)
+            fetch(URL_API + '?nocache=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
                     cacheRegistrosHoy = data;
