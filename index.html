@@ -89,8 +89,8 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <button id="btn-ingreso" disabled onclick="registrar('Ingreso')" class="w-full bg-[#108A29] hover:bg-green-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-in-alt"></i> Marcar INGRESO</button>
-                    <button id="btn-salida" disabled onclick="registrar('Salida')" class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-out-alt"></i> Marcar SALIDA</button>
+                    <button id="btn-ingreso" disabled onclick="registrar('Ingreso')" class="w-full bg-[#108A29] hover:bg-green-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-green-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-in-alt"></i> <span>Marcar INGRESO</span></button>
+                    <button id="btn-salida" disabled onclick="registrar('Salida')" class="w-full bg-[#E50014] hover:bg-red-700 text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition shadow-lg shadow-red-200 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fas fa-sign-out-alt"></i> <span>Marcar SALIDA</span></button>
                 </div>
 
                 <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mb-4">
@@ -110,19 +110,19 @@
                 </div>
             </div>
 
-            <!-- SECCIÓN: ÚLTIMAS MARCACIONES -->
+            <!-- SECCIÓN: MARCACIONES DE HOY -->
             <div class="bg-white rounded-2xl shadow-xl p-5 md:p-6 max-w-2xl w-full border border-slate-100">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 rounded-full bg-blue-50 text-[#0B3B60] flex items-center justify-center font-bold"><i class="fas fa-clock text-sm"></i></div>
                         <div>
-                            <h3 class="font-bold text-slate-800 text-sm md:text-base">Últimos Registros</h3>
-                            <p class="text-[11px] text-slate-400">Desliza para ver el historial reciente</p>
+                            <h3 class="font-bold text-slate-800 text-sm md:text-base">Marcaciones de hoy</h3>
+                            <p class="text-[11px] text-slate-400">Desliza para ver hasta las 50 más recientes</p>
                         </div>
                     </div>
-                    <!-- Contador fijo -->
+                    <!-- Contador dinámico de marcaciones -->
                     <div class="text-[11px] font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100" id="contador-marcaciones">
-                        15 recientes
+                        0 marcaciones
                     </div>
                 </div>
                 
@@ -146,6 +146,34 @@
         </div>
     </main>
 
+    <!-- MODAL ADMIN -->
+    <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
+            <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-blue-100 text-[#0B3B60] flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-shield"></i></div>
+                <h3 class="text-lg font-bold text-gray-800">Panel de Administración</h3>
+                <p class="text-xs text-gray-500">Ingreso exclusivo para supervisores</p>
+            </div>
+            <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Usuario</label>
+                    <input type="text" id="admin-user" required autocomplete="username" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="admin">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Contraseña</label>
+                    <input type="password" id="admin-pass" required autocomplete="current-password" class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0B3B60] focus:outline-none" placeholder="••••••••">
+                </div>
+                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-1"></i> Usuario o contraseña incorrectos.
+                </div>
+                <button type="submit" class="w-full bg-[#0B3B60] hover:bg-blue-900 text-white font-semibold py-2.5 rounded-lg text-sm transition flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const URL_API = 'https://script.google.com/macros/s/AKfycbxz0W82J83YT2BEITU3PC6DC-tPJ4JQvN_O_ZIQbUCOX55Dn84GWTBe4gD9d1C235oA/exec';
         
@@ -160,7 +188,7 @@
         };
 
         let latitudActual = null; let longitudActual = null; let direccionActual = "Buscando ubicación...";
-        let cacheRegistrosGenerales = []; // Todos los registros recientes
+        let cacheRegistrosGenerales = []; 
 
         const inputDni = document.getElementById('dni');
         const inputNombre = document.getElementById('nombre');
@@ -168,9 +196,22 @@
         const btnSalida = document.getElementById('btn-salida');
         const gpsStatus = document.getElementById('gps-status');
 
+        function normalizarFecha(f) {
+            if (!f) return "";
+            let p = String(f).trim().split(/[-/]/);
+            if (p.length === 3) return parseInt(p[0]) + "/" + parseInt(p[1]) + "/" + p[2];
+            return String(f).trim();
+        }
+
+        function obtenerFechaHoy() {
+            const d = new Date();
+            return d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
+        }
+
         setInterval(() => {
-            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-PE');
-            document.getElementById('hora-actual').innerText = new Date().toLocaleTimeString('es-PE', {hour12: true});
+            const d = new Date();
+            document.getElementById('fecha-actual').innerText = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+            document.getElementById('hora-actual').innerText = d.toLocaleTimeString('es-PE', {hour12: true});
         }, 1000);
 
         if ("geolocation" in navigator) {
@@ -178,11 +219,7 @@
                 latitudActual = pos.coords.latitude; longitudActual = pos.coords.longitude;
                 direccionActual = `Lat: ${latitudActual}, Lon: ${longitudActual}`; 
                 
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
-                    if(res.ok) { const data = await res.json(); if(data.display_name) direccionActual = data.display_name; }
-                } catch(e) {}
-
+                // DESBLOQUEO INMEDIATO PARA MAYOR VELOCIDAD
                 inputDni.disabled = false; 
                 inputDni.classList.remove('bg-gray-100', 'cursor-not-allowed'); inputDni.classList.add('bg-white');
                 inputDni.placeholder = "Ej. 12345678"; inputNombre.placeholder = "Tu nombre aparecerá aquí";
@@ -190,6 +227,13 @@
                 gpsStatus.innerHTML = '<i class="fas fa-map-marker-alt text-lg"></i> <span>Ubicación lista. Ya puedes registrarte.</span>';
                 
                 verificarBotones();
+
+                // Busca el nombre de la calle en segundo plano sin interrumpir al usuario
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
+                    if(res.ok) { const data = await res.json(); if(data.display_name) direccionActual = data.display_name; }
+                } catch(e) {}
+
             }, () => {
                 gpsStatus.innerHTML = 'GPS bloqueado. Dale permisos en tu navegador.';
             }, { enableHighAccuracy: true });
@@ -212,52 +256,43 @@
             verificarBotones();
         });
 
-        // 🔥 NUEVA LÓGICA DE BOTONES: Busca tu ÚLTIMO movimiento, sin importar la fecha estricta
         function verificarBotones() {
             const dniVal = String(inputDni.value).trim();
             btnIngreso.disabled = true; btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
             btnSalida.disabled = true; btnSalida.classList.add('opacity-40', 'cursor-not-allowed');
 
+            // Restaurar textos originales por si estaban en "Registrando..."
+            btnIngreso.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Marcar INGRESO</span>`;
+            btnSalida.innerHTML = `<i class="fas fa-sign-out-alt"></i> <span>Marcar SALIDA</span>`;
+
             if (dniVal.length === 8 && colaboradoresDB[dniVal] && latitudActual) {
                 
-                // Filtra solo los registros de ESTE trabajador
                 const registrosDelTecnico = cacheRegistrosGenerales.filter(r => String(r.dni).trim() === dniVal);
                 
                 let esDeHoy = false;
                 let ultimoTipo = null;
 
                 if (registrosDelTecnico.length > 0) {
-                    // Obtiene su movimiento más reciente en la historia
                     const ultimoRegistro = registrosDelTecnico[registrosDelTecnico.length - 1];
                     ultimoTipo = String(ultimoRegistro.tipo).toLowerCase().trim();
                     
-                    // Comprobación relajada: ¿Ese último registro tiene el día y año de hoy?
-                    const fechaStr = String(ultimoRegistro.fecha);
-                    const diaHoy = String(new Date().getDate());
-                    const anioHoy = String(new Date().getFullYear());
-                    
-                    if (fechaStr.includes(diaHoy) && fechaStr.includes(anioHoy)) {
+                    if (normalizarFecha(ultimoRegistro.fecha) === obtenerFechaHoy()) {
                         esDeHoy = true;
                     }
                 }
 
                 if (!esDeHoy) { 
-                    // Si no tiene registros hoy -> Habilitar INGRESO
                     btnIngreso.disabled = false; 
                     btnIngreso.classList.remove('opacity-40', 'cursor-not-allowed'); 
                 } else {
-                    // Si TIENE registros hoy...
                     if (ultimoTipo === "ingreso") {
-                        // Lo último fue Ingreso -> Habilitar SALIDA
                         btnSalida.disabled = false; 
                         btnSalida.classList.remove('opacity-40', 'cursor-not-allowed'); 
                     }
-                    // Si lo último fue "salida", ambos se quedan bloqueados
                 }
             }
         }
 
-        // 🔥 NUEVA LÓGICA DE TABLA: Muestra los últimos 15 de la lista sin filtros
         function cargarMarcacionesHoy() {
             fetch(URL_API + '?nocache=' + new Date().getTime())
                 .then(res => res.json())
@@ -268,17 +303,22 @@
                     const tbody = document.getElementById('tabla-marcaciones-hoy');
                     tbody.innerHTML = '';
                     
-                    // Tomamos literalmente los últimos 15 registros de la hoja (los más recientes)
-                    const ultimos15 = data.slice(-15).reverse();
+                    const deHoy = data.filter(item => normalizarFecha(item.fecha) === obtenerFechaHoy()).reverse();
 
-                    if(ultimos15.length === 0) {
-                        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400">El sistema está vacío.</td></tr>`;
+                    document.getElementById('contador-marcaciones').innerText = `${deHoy.length} marcaciones hoy`;
+
+                    if(deHoy.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400">Aún no hay marcaciones hoy.</td></tr>`;
                         return;
                     }
 
-                    ultimos15.forEach(item => {
+                    // 🔥 LIMITE DE 50 REGISTROS (Tomamos solo los últimos 50)
+                    const ultimos50 = deHoy.slice(0, 50);
+
+                    ultimos50.forEach(item => {
                         const esIngreso = String(item.tipo).toLowerCase().trim() === "ingreso";
                         const badgeColor = esIngreso ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
+                        const dniOculto = "****" + String(item.dni).slice(-4);
                         
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 transition";
@@ -296,13 +336,18 @@
 
         function registrar(tipo) {
             if(inputDni.value.length !== 8 || !inputNombre.value) return alert("Ingrese un DNI válido.");
+            
+            // EFECTO VISUAL DE CARGA INMEDIATO
+            const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
+            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
+            
             btnIngreso.disabled = true; btnSalida.disabled = true;
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
 
             const payload = { 
                 tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
-                fecha: new Date().toLocaleDateString('es-PE'),
+                fecha: obtenerFechaHoy(), 
                 hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
@@ -313,17 +358,20 @@
                 if (data.status === "duplicado") {
                     document.getElementById('mensaje-error').classList.remove('hidden');
                     document.getElementById('mensaje-error-detalle').innerText = data.mensaje;
+                    verificarBotones(); // Restaura el botón si hubo error
                 } else {
                     document.getElementById('mensaje-exito').classList.remove('hidden');
                     inputDni.value = ""; inputNombre.value = ""; 
                     inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
                     setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
+                    cargarMarcacionesHoy(); // Recarga la tabla de inmediato
                 }
-                cargarMarcacionesHoy();
-            }).catch(e => { alert("Error de conexión. Revisa tu internet."); verificarBotones(); });
+            }).catch(e => { 
+                alert("Error de conexión. Revisa tu internet."); 
+                verificarBotones(); 
+            });
         }
 
-        // Lógica de Modal omitida para limpieza, si la usas, aquí está:
         function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); document.getElementById('admin-error').classList.add('hidden'); }
         function cerrarModalAdmin() { document.getElementById('modal-admin').classList.add('hidden'); }
         function validarLoginAdmin(e) {
