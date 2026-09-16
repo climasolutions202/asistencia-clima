@@ -177,6 +177,7 @@
     <script>
         const URL_API = 'https://script.google.com/macros/s/AKfycbxz0W82J83YT2BEITU3PC6DC-tPJ4JQvN_O_ZIQbUCOX55Dn84GWTBe4gD9d1C235oA/exec';
         
+        // LISTA ACTUALIZADA (21 COLABORADORES)
         const colaboradoresDB = {
             "71327636": "LUIS ATENCIO", "75508088": "BRANDO CAIRAMPOMA", "41161747": "ALEXIS CORTEZ",
             "06268184": "FABIAN FIGUEROA", "47066523": "JUAN KISE", "01811361": "MILAGROS MARTINEZ",
@@ -184,7 +185,7 @@
             "72474094": "LEANDRO ORTIZ", "72098343": "JESUS RAMOS", "41064502": "ANGEL SILVA",
             "73089505": "JHON SUAZO", "75846153": "ROXANA SUCA", "42828195": "EDUARDO VALENZUELA",
             "72313088": "VALERI MORA", "07211400": "JESUS PIZANO", "42837163": "SHIRLEY OSCCO",
-            "72012494": "NAYELI GUERREROS", "75526744": "LIZET RODRIGUEZ"
+            "72012494": "NAYELI GUERREROS", "75526744": "LIZET RODRIGUEZ", "73048068": "LUSBETH DE LA CRUZ"
         };
 
         let latitudActual = null; let longitudActual = null; let direccionActual = "Buscando ubicación...";
@@ -219,7 +220,6 @@
                 latitudActual = pos.coords.latitude; longitudActual = pos.coords.longitude;
                 direccionActual = `Lat: ${latitudActual}, Lon: ${longitudActual}`; 
                 
-                // DESBLOQUEO INMEDIATO PARA MAYOR VELOCIDAD
                 inputDni.disabled = false; 
                 inputDni.classList.remove('bg-gray-100', 'cursor-not-allowed'); inputDni.classList.add('bg-white');
                 inputDni.placeholder = "Ej. 12345678"; inputNombre.placeholder = "Tu nombre aparecerá aquí";
@@ -228,7 +228,6 @@
                 
                 verificarBotones();
 
-                // Busca el nombre de la calle en segundo plano sin interrumpir al usuario
                 try {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitudActual}&lon=${longitudActual}`);
                     if(res.ok) { const data = await res.json(); if(data.display_name) direccionActual = data.display_name; }
@@ -261,13 +260,13 @@
             btnIngreso.disabled = true; btnIngreso.classList.add('opacity-40', 'cursor-not-allowed');
             btnSalida.disabled = true; btnSalida.classList.add('opacity-40', 'cursor-not-allowed');
 
-            // Restaurar textos originales por si estaban en "Registrando..."
             btnIngreso.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Marcar INGRESO</span>`;
             btnSalida.innerHTML = `<i class="fas fa-sign-out-alt"></i> <span>Marcar SALIDA</span>`;
 
             if (dniVal.length === 8 && colaboradoresDB[dniVal] && latitudActual) {
                 
-                const registrosDelTecnico = cacheRegistrosGenerales.filter(r => String(r.dni).trim() === dniVal);
+                // 🛡️ REPARADOR DE DNIs: Asegura que el DNI que viene de Sheets siempre tenga 8 dígitos (agrega el 0 perdido)
+                const registrosDelTecnico = cacheRegistrosGenerales.filter(r => String(r.dni).padStart(8, '0') === dniVal);
                 
                 let esDeHoy = false;
                 let ultimoTipo = null;
@@ -312,13 +311,15 @@
                         return;
                     }
 
-                    // 🔥 LIMITE DE 50 REGISTROS (Tomamos solo los últimos 50)
                     const ultimos50 = deHoy.slice(0, 50);
 
                     ultimos50.forEach(item => {
                         const esIngreso = String(item.tipo).toLowerCase().trim() === "ingreso";
                         const badgeColor = esIngreso ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
-                        const dniOculto = "****" + String(item.dni).slice(-4);
+                        
+                        // 🛡️ REPARADOR VISUAL DE DNIs: Rellena con ceros para ocultar asteriscos correctos
+                        const dniCompleto = String(item.dni).padStart(8, '0');
+                        const dniOculto = "****" + dniCompleto.slice(-4);
                         
                         const tr = document.createElement('tr');
                         tr.className = "hover:bg-slate-50 transition";
@@ -337,7 +338,6 @@
         function registrar(tipo) {
             if(inputDni.value.length !== 8 || !inputNombre.value) return alert("Ingrese un DNI válido.");
             
-            // EFECTO VISUAL DE CARGA INMEDIATO
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
             
@@ -358,13 +358,13 @@
                 if (data.status === "duplicado") {
                     document.getElementById('mensaje-error').classList.remove('hidden');
                     document.getElementById('mensaje-error-detalle').innerText = data.mensaje;
-                    verificarBotones(); // Restaura el botón si hubo error
+                    verificarBotones(); 
                 } else {
                     document.getElementById('mensaje-exito').classList.remove('hidden');
                     inputDni.value = ""; inputNombre.value = ""; 
                     inputNombre.className = "w-full pl-10 pr-3 py-3 border border-gray-200 bg-gray-50 rounded-lg cursor-not-allowed";
                     setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
-                    cargarMarcacionesHoy(); // Recarga la tabla de inmediato
+                    cargarMarcacionesHoy(); 
                 }
             }).catch(e => { 
                 alert("Error de conexión. Revisa tu internet."); 
