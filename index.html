@@ -101,8 +101,8 @@
                     <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mt-4">
                         <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                         <div>
-                            <h4 class="text-green-800 font-bold">¡Asistencia registrada exitosamente!</h4>
-                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya aparece en tu Excel.</p>
+                            <h4 class="text-green-800 font-bold">¡Asistencia registrada!</h4>
+                            <p id="mensaje-detalle" class="text-green-600 text-sm">Registro guardado exitosamente.</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                                 </thead>
                                 <tbody id="tabla-marcaciones-hoy" class="divide-y divide-slate-100 bg-white">
                                     <tr>
-                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Conectando con Google Sheets...</td>
+                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando tabla de asistencias...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -170,7 +170,6 @@
         </div>
     </main>
 
-    <!-- MODAL ADMIN -->
     <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
             <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
@@ -181,14 +180,15 @@
             <form onsubmit="validarLoginAdmin(event)">
                 <div class="mb-4"><input type="text" id="admin-user" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="admin"></div>
                 <div class="mb-4"><input type="password" id="admin-pass" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="••••••••"></div>
-                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mb-4">Usuario o contraseña incorrectos.</div>
+                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mb-4">Usuario incorrecto.</div>
                 <button type="submit" class="w-full bg-[#0B3B60] text-white font-semibold py-2.5 rounded-lg text-sm">Iniciar Sesión</button>
             </form>
         </div>
     </div>
 
     <script>
-        const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
+        // 👇 PEGA TU NUEVO ENLACE AQUÍ ABAJO ENTRE LAS COMILLAS 👇
+        const URL_API = 'PEGA_AQUI_TU_NUEVO_ENLACE';
         
         const colaboradoresDB = {
             "71327636": "LUIS ATENCIO", "75508088": "BRANDO CAIRAMPOMA", "41161747": "ALEXIS CORTEZ",
@@ -396,37 +396,25 @@
             });
         }
 
-        // CARGA PROTEGIDA CONTRA ERRORES DE PERMISOS
+        // CARGA ORIGINAL 100% SEGURA
         function cargarMarcacionesHoy() {
+            if(URL_API === 'PEGA_AQUI_TU_NUEVO_ENLACE') return; // Evita error si no cambian el enlace
+            
             fetch(URL_API)
-                .then(res => res.text()) 
-                .then(text => {
-                    try {
-                        let data = JSON.parse(text);
-                        if(Array.isArray(data)) {
-                            cacheRegistrosGenerales = data; 
-                        } else {
-                            cacheRegistrosGenerales = [];
-                        }
-                        verificarBotones(); 
-                        renderizarTabla();
-                    } catch(e) {
-                        cacheRegistrosGenerales = [];
-                        verificarBotones(); 
-                        document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Bloqueado por Google. Revisa Apps Script -> Gestionar implementaciones -> Lápiz -> Cualquier persona -> Guardar.</td></tr>`;
-                    }
+                .then(res => res.json())
+                .then(data => {
+                    cacheRegistrosGenerales = Array.isArray(data) ? data : []; 
+                    verificarBotones(); 
+                    renderizarTabla();
                 })
                 .catch(err => {
-                    cacheRegistrosGenerales = [];
-                    verificarBotones(); 
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-wifi block text-2xl mb-2"></i> Verificando conexión...</td></tr>`;
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Falta configurar Google Apps Script.</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
         setInterval(cargarMarcacionesHoy, 20000);
 
-        // 🔥 REGISTRO 100% ANTIBLOQUEO (Usa Formulario de navegador en lugar de JSON)
         function registrar(tipo) {
             const inputDni = document.getElementById('dni');
             const inputNombre = document.getElementById('nombre');
@@ -437,39 +425,39 @@
             const btnSalida = document.getElementById('btn-salida');
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             
-            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
+            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Enviando...</span>`;
+            
             btnIngreso.disabled = true; btnSalida.disabled = true;
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
 
-            // Armamos el dato tipo "Formulario de Internet" (URLSearchParams) para saltar el CORS de Google
-            const payloadFormulario = new URLSearchParams();
-            payloadFormulario.append("tipo", tipo);
-            payloadFormulario.append("dni", inputDni.value);
-            payloadFormulario.append("nombre", inputNombre.value);
-            payloadFormulario.append("fecha", obtenerFechaHoy());
-            payloadFormulario.append("hora", new Date().toLocaleTimeString('es-PE', {hour12: true}));
-            payloadFormulario.append("latitud", latitudActual || "");
-            payloadFormulario.append("longitud", longitudActual || "");
-            payloadFormulario.append("direccion", direccionActual || "");
-            payloadFormulario.append("dispositivo", navigator.userAgent || "");
+            // USANDO URLSEARCHPARAMS (El formato Anti-Bloqueo de navegadores)
+            const payload = new URLSearchParams();
+            payload.append("tipo", tipo);
+            payload.append("dni", inputDni.value);
+            payload.append("nombre", inputNombre.value);
+            payload.append("fecha", obtenerFechaHoy());
+            payload.append("hora", new Date().toLocaleTimeString('es-PE', {hour12: true}));
+            payload.append("latitud", latitudActual || "");
+            payload.append("longitud", longitudActual || "");
+            payload.append("direccion", direccionActual || "");
+            payload.append("dispositivo", navigator.userAgent || "");
 
             fetch(URL_API, { 
                 method: 'POST', 
-                body: payloadFormulario // Enviamos el formulario nativo
+                body: payload 
             })
-            .then(res => res.text())
-            .then(texto => {
+            .then(res => res.json())
+            .then(data => {
                 document.getElementById('mensaje-exito').classList.remove('hidden');
-                
                 inputDni.value = ""; inputNombre.value = ""; 
                 inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
                 
-                cargarMarcacionesHoy(); // Recarga la tabla de Google
+                cargarMarcacionesHoy(); 
                 setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
             })
             .catch(e => {
-                alert("Bloqueo de red detectado. Verifica que Apps Script esté configurado para 'Cualquier Persona'.");
+                alert("Error al enviar. Intenta de nuevo.");
                 verificarBotones(); 
             });
         }
