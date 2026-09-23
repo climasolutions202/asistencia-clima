@@ -102,7 +102,7 @@
                         <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                         <div>
                             <h4 class="text-green-800 font-bold">¡Asistencia registrada!</h4>
-                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ha sido enviado exitosamente.</p>
+                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro se guardó correctamente.</p>
                         </div>
                     </div>
                 </div>
@@ -170,6 +170,7 @@
         </div>
     </main>
 
+    <!-- MODAL ADMIN -->
     <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
             <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
@@ -187,6 +188,7 @@
     </div>
 
     <script>
+        // URL CONFIRMADA
         const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
         
         const colaboradoresDB = {
@@ -389,6 +391,7 @@
             });
         }
 
+        // CARGAR TABLA Y SALTAR SEGURIDAD CORS DE LECTURA
         function cargarMarcacionesHoy() {
             fetch(URL_API + '?nocache=' + new Date().getTime())
                 .then(res => res.json())
@@ -399,13 +402,15 @@
                     renderizarTabla();
                 })
                 .catch(err => {
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold"><i class="fas fa-exclamation-triangle"></i> Error conectando al servidor.</td></tr>`;
+                    console.error("Fallo al descargar", err);
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold"><i class="fas fa-exclamation-triangle"></i> Error conectando al servidor. Revisa los permisos en Apps Script.</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
         setInterval(cargarMarcacionesHoy, 15000);
 
+        // ENVIAR DATOS A EXCEL
         function registrar(tipo) {
             const inputDni = document.getElementById('dni');
             const inputNombre = document.getElementById('nombre');
@@ -416,7 +421,7 @@
             const btnSalida = document.getElementById('btn-salida');
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             
-            // Texto actualizado a "Registrando..." tal como lo pediste
+            // Texto solicitado
             btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
             
             btnIngreso.disabled = true; btnSalida.disabled = true;
@@ -430,16 +435,16 @@
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
 
-            // Envio oculto 'no-cors' para evadir el bloqueo de seguridad de Google Chrome
+            // Envío en texto plano para que Google Chrome no bloquee el POST
             fetch(URL_API, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                headers: { 'Content-Type': 'text/plain' }, 
+                method: 'POST',
                 body: JSON.stringify(payload) 
-            }).then(() => {
+            })
+            .then(res => res.json())
+            .then(data => {
                 document.getElementById('mensaje-exito').classList.remove('hidden');
                 
-                // Actualiza la tabla inmediatamente para que se vea el registro
+                // Actualiza visualmente de inmediato
                 cacheRegistrosGenerales.push({
                     tipo: payload.tipo, dni: payload.dni, nombre: payload.nombre,
                     fecha: payload.fecha, hora: payload.hora, direccion: payload.direccion,
@@ -451,11 +456,11 @@
                 inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
                 
                 verificarBotones(); 
-
                 setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
-            }).catch(e => {
-                alert("Hubo un error, revisa tu conexión a internet.");
-                verificarBotones();
+            })
+            .catch(e => { 
+                alert("Error de conexión. Asegúrate de actualizar los permisos a 'Cualquier persona' en Apps Script."); 
+                verificarBotones(); 
             });
         }
 
