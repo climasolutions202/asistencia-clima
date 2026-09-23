@@ -51,6 +51,7 @@
         <div class="flex-1 flex flex-col items-center xl:items-start justify-start p-4 md:p-8 overflow-y-auto">
             <div class="w-full max-w-5xl flex flex-col gap-6 mx-auto xl:mx-0">
                 
+                <!-- TARJETA SUPERIOR -->
                 <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 w-full border border-slate-100 relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full -z-10 opacity-50"></div>
                     
@@ -101,15 +102,24 @@
                     <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mt-4">
                         <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                         <div>
-                            <h4 class="text-green-800 font-bold">¡Asistencia registrada!</h4>
-                            <p id="mensaje-detalle" class="text-green-600 text-sm">Registro guardado exitosamente.</p>
+                            <h4 class="text-green-800 font-bold">¡Asistencia registrada exitosamente!</h4>
+                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya aparece en el sistema.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="mensaje-error" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-4 mt-4">
+                        <div class="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <h4 class="text-red-800 font-bold">Error de conexión</h4>
+                            <p id="mensaje-error-detalle" class="text-red-600 text-sm">No se pudo guardar. Intenta de nuevo.</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- TARJETAS INFERIORES -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
                     
-                    <!-- TABLA MEJORADA CON ALERTAS -->
+                    <!-- TABLA -->
                     <div class="bg-white rounded-2xl shadow-xl p-5 md:p-6 lg:col-span-2 border border-slate-100 flex flex-col h-80">
                         <div class="flex justify-between items-center mb-4">
                             <div class="flex items-center gap-2.5">
@@ -136,13 +146,14 @@
                                 </thead>
                                 <tbody id="tabla-marcaciones-hoy" class="divide-y divide-slate-100 bg-white">
                                     <tr>
-                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando tabla...</td>
+                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando tabla de asistencias...</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
+                    <!-- MÓDULO GPS -->
                     <div class="bg-white rounded-2xl shadow-xl p-5 md:p-6 border border-slate-100 flex flex-col h-80 relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-green-50 rounded-bl-full -z-10 opacity-60"></div>
                         <div class="flex items-center gap-2.5 mb-3">
@@ -171,8 +182,8 @@
         </div>
     </main>
 
+    <!-- MODAL ADMIN -->
     <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
-        <!-- ... (código modal admin oculto) ... -->
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
             <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
             <div class="text-center mb-6">
@@ -189,6 +200,7 @@
     </div>
 
     <script>
+        // LA URL DE TU EXCEL
         const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
         
         const colaboradoresDB = {
@@ -356,7 +368,6 @@
             }
         }
 
-        // FUNCION PARA DIBUJAR LA TABLA (MÁX 50)
         function renderizarTabla() {
             const tbody = document.getElementById('tabla-marcaciones-hoy');
             tbody.innerHTML = '';
@@ -392,31 +403,25 @@
             });
         }
 
-        // CARGA PROTEGIDA CONTRA ERRORES
+        // CARGA TRADICIONAL Y SEGURA (La que siempre funcionó)
         function cargarMarcacionesHoy() {
             fetch(URL_API)
-                .then(res => res.text()) // Leemos como texto primero para evitar crashes
-                .then(text => {
-                    try {
-                        let data = JSON.parse(text);
-                        if(!Array.isArray(data)) data = [];
-                        cacheRegistrosGenerales = data; 
-                        verificarBotones(); 
-                        renderizarTabla();
-                    } catch(e) {
-                        // Si Google devuelve HTML (error de permisos), muestra este aviso
-                        document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Error: El Excel bloqueó la lectura. Ve a Apps Script y asegúrate de dar acceso a "Cualquier persona" (Anyone).</td></tr>`;
-                    }
+                .then(res => res.json())
+                .then(data => {
+                    cacheRegistrosGenerales = data; 
+                    verificarBotones(); 
+                    renderizarTabla();
                 })
                 .catch(err => {
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold"><i class="fas fa-wifi"></i> Sin conexión a internet.</td></tr>`;
+                    console.error("Error al cargar la tabla", err);
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Error: Google Sheets bloqueó la conexión.</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
-        setInterval(cargarMarcacionesHoy, 20000);
+        setInterval(cargarMarcacionesHoy, 15000);
 
-        // 🔥 REGISTRO INSTANTÁNEO Y SEGURO CERO-CORS
+        // REGISTRO TRADICIONAL Y SEGURO
         function registrar(tipo) {
             const inputDni = document.getElementById('dni');
             const inputNombre = document.getElementById('nombre');
@@ -439,33 +444,27 @@
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
 
-            // 1. Mostrar éxito al instante
-            document.getElementById('mensaje-exito').classList.remove('hidden');
-            
-            // 2. Insertar en tabla para que el técnico lo vea
-            cacheRegistrosGenerales.push({
-                tipo: payload.tipo, dni: payload.dni, nombre: payload.nombre,
-                fecha: payload.fecha, hora: payload.hora, direccion: payload.direccion,
-                gpsLink: `https://www.google.com/maps?q=${payload.latitud},${payload.longitud}`
-            });
-            renderizarTabla();
-
-            // 3. Limpiar caja
-            inputDni.value = ""; inputNombre.value = ""; 
-            inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
-            
-            verificarBotones(); // Esto bloqueará los botones por 10 minutos automáticamente
-            setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 4000);
-
-            // 4. ENVÍO OCULTO A GOOGLE (Evita el bloqueo rojo en la consola)
+            // Envío normal, espera a que el Excel responda "OK"
             fetch(URL_API, { 
                 method: 'POST', 
-                mode: 'no-cors', // LA LLAVE MAESTRA
-                headers: { 'Content-Type': 'text/plain' }, 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                 body: JSON.stringify(payload) 
-            }).then(() => {
-                console.log("Enviado a Google con éxito en modo invisible.");
-            }).catch(e => console.log("Error silencioso", e));
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Muestra éxito solo cuando Google confirma
+                document.getElementById('mensaje-exito').classList.remove('hidden');
+                
+                inputDni.value = ""; inputNombre.value = ""; 
+                inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
+                
+                cargarMarcacionesHoy(); // Actualiza la tabla real
+                setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
+            })
+            .catch(e => {
+                document.getElementById('mensaje-error').classList.remove('hidden');
+                verificarBotones(); 
+            });
         }
 
         function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); }
