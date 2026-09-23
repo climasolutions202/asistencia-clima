@@ -187,8 +187,8 @@
     </div>
 
     <script>
-        // 👇 PEGA TU NUEVO ENLACE AQUÍ ABAJO ENTRE LAS COMILLAS 👇
-        const URL_API = 'PEGA_AQUI_TU_NUEVO_ENLACE';
+        // ✅ AQUÍ ESTÁ TU ENLACE NUEVO Y LIMPIO
+        const URL_API = 'https://script.google.com/macros/s/AKfycbzrIz7yqMXeKAQw4qTd5p7ihlXN27ZWu1cC11AAkwQuDJSjp76Kn-7j0xP--dtS02Y/exec';
         
         const colaboradoresDB = {
             "71327636": "LUIS ATENCIO", "75508088": "BRANDO CAIRAMPOMA", "41161747": "ALEXIS CORTEZ",
@@ -396,10 +396,8 @@
             });
         }
 
-        // CARGA ORIGINAL 100% SEGURA
+        // CARGA PROTEGIDA
         function cargarMarcacionesHoy() {
-            if(URL_API === 'PEGA_AQUI_TU_NUEVO_ENLACE') return; // Evita error si no cambian el enlace
-            
             fetch(URL_API)
                 .then(res => res.json())
                 .then(data => {
@@ -408,7 +406,7 @@
                     renderizarTabla();
                 })
                 .catch(err => {
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Falta configurar Google Apps Script.</td></tr>`;
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Ocurrió un error conectando con el servidor.</td></tr>`;
                 });
         }
 
@@ -425,27 +423,22 @@
             const btnSalida = document.getElementById('btn-salida');
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             
-            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Enviando...</span>`;
+            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
             
             btnIngreso.disabled = true; btnSalida.disabled = true;
             document.getElementById('mensaje-exito').classList.add('hidden');
-            document.getElementById('mensaje-error').classList.add('hidden');
 
-            // USANDO URLSEARCHPARAMS (El formato Anti-Bloqueo de navegadores)
-            const payload = new URLSearchParams();
-            payload.append("tipo", tipo);
-            payload.append("dni", inputDni.value);
-            payload.append("nombre", inputNombre.value);
-            payload.append("fecha", obtenerFechaHoy());
-            payload.append("hora", new Date().toLocaleTimeString('es-PE', {hour12: true}));
-            payload.append("latitud", latitudActual || "");
-            payload.append("longitud", longitudActual || "");
-            payload.append("direccion", direccionActual || "");
-            payload.append("dispositivo", navigator.userAgent || "");
+            const payload = { 
+                tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
+                fecha: obtenerFechaHoy(), 
+                hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
+                latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
+            };
 
             fetch(URL_API, { 
                 method: 'POST', 
-                body: payload 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload) 
             })
             .then(res => res.json())
             .then(data => {
