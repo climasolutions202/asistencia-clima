@@ -40,6 +40,7 @@
 
     <main class="flex-1 flex flex-col md:flex-row bg-pantalla-completa">
         
+        <!-- COLUMNA IZQUIERDA -->
         <div class="hidden md:flex md:w-1/3 xl:w-1/4 p-10 pt-16 xl:pt-24 flex-col justify-start text-white">
             <h1 class="text-4xl xl:text-5xl font-bold mb-4 leading-tight">Expertos en sistemas de<br><span class="text-green-400">aire acondicionado.</span></h1>
             <div class="flex items-start gap-3 mt-4 bg-[#0B3B60]/40 p-4 rounded-xl backdrop-blur-sm border border-white/10">
@@ -48,6 +49,7 @@
             </div>
         </div>
 
+        <!-- COLUMNA DERECHA -->
         <div class="flex-1 flex flex-col items-center xl:items-start justify-start p-4 md:p-8 overflow-y-auto">
             <div class="w-full max-w-5xl flex flex-col gap-6 mx-auto xl:mx-0">
                 
@@ -72,7 +74,6 @@
                         </div>
                     </div>
 
-                    <!-- AVISO DE GPS REFORZADO -->
                     <div id="gps-status" class="mb-6 p-3 bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm transition-all">
                         <i class="fas fa-spinner fa-spin text-lg"></i> 
                         <span>Ubicando tu dispositivo... Por favor espera.</span>
@@ -103,8 +104,8 @@
                     <div id="mensaje-exito" class="hidden bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-4 mt-4">
                         <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                         <div>
-                            <h4 class="text-green-800 font-bold">¡Asistencia registrada al instante!</h4>
-                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya está en el sistema.</p>
+                            <h4 class="text-green-800 font-bold">¡Asistencia guardada exitosamente!</h4>
+                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya está asegurado en Excel.</p>
                         </div>
                     </div>
                 </div>
@@ -112,7 +113,7 @@
                 <!-- 2. TARJETAS INFERIORES -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
                     
-                    <!-- TABLA BLINDADA CONTRA ERRORES -->
+                    <!-- TABLA -->
                     <div class="bg-white rounded-2xl shadow-xl p-5 md:p-6 lg:col-span-2 border border-slate-100 flex flex-col h-80">
                         <div class="flex justify-between items-center mb-4">
                             <div class="flex items-center gap-2.5">
@@ -183,17 +184,16 @@
                 <div class="w-12 h-12 rounded-full bg-blue-100 text-[#0B3B60] flex items-center justify-center mx-auto mb-3 text-xl"><i class="fas fa-user-shield"></i></div>
                 <h3 class="text-lg font-bold text-gray-800">Panel de Administración</h3>
             </div>
-            <form onsubmit="validarLoginAdmin(event)" class="space-y-4">
-                <div><input type="text" id="admin-user" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="admin"></div>
-                <div><input type="password" id="admin-pass" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="••••••••"></div>
-                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200">Usuario incorrecto.</div>
+            <form onsubmit="validarLoginAdmin(event)">
+                <div class="mb-4"><input type="text" id="admin-user" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="admin"></div>
+                <div class="mb-4"><input type="password" id="admin-pass" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="••••••••"></div>
+                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mb-4">Usuario incorrecto.</div>
                 <button type="submit" class="w-full bg-[#0B3B60] text-white font-semibold py-2.5 rounded-lg text-sm">Iniciar Sesión</button>
             </form>
         </div>
     </div>
 
     <script>
-        // URL CONFIRMADA
         const URL_API = 'https://script.google.com/macros/s/AKfycbzrW22jgdKlWnkU2_gWMdprPgX8J_mIexO10jPgH7SKVtOOlGoMXg3L37nSjgCKLtt0/exec';
         
         const colaboradoresDB = {
@@ -247,7 +247,6 @@
             document.getElementById('hora-actual').innerText = d.toLocaleTimeString('es-PE', {hour12: true});
         }, 1000);
 
-        // 🛡️ SOLUCIÓN: MANEJO DEL GPS ESTRICTO
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 latitudActual = pos.coords.latitude; 
@@ -285,14 +284,11 @@
                             document.getElementById('texto-ubicacion').innerHTML = `<i class="fas fa-map-pin text-red-500 mr-1 text-xs"></i> <span class="text-[10px]">${direccionActual}</span>`;
                         }
                     }
-                } catch(e) {
-                    // Cae aquí si falla la calle, pero el GPS sí funcionó
-                }
+                } catch(e) {}
 
             }, (error) => {
-                // AVISO CLARO SI EL GPS ESTÁ APAGADO O DENEGADO
                 document.getElementById('gps-status').className = "mb-6 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
-                document.getElementById('gps-status').innerHTML = '<i class="fas fa-ban text-lg"></i> <span>Activa tu GPS o dale "Permitir" para marcar.</span>';
+                document.getElementById('gps-status').innerHTML = '<i class="fas fa-ban text-lg"></i> <span>Activa tu GPS para poder marcar.</span>';
                 document.getElementById('texto-ubicacion').innerText = "Permiso de GPS denegado.";
                 document.getElementById('mapa-loading').innerHTML = '<i class="fas fa-ban text-red-500 text-2xl mb-2"></i><span class="text-xs">GPS inactivo</span>';
             }, { enableHighAccuracy: true });
@@ -330,35 +326,30 @@
             btnIngreso.innerHTML = `<i class="fas fa-sign-in-alt"></i> <span>Marcar INGRESO</span>`;
             btnSalida.innerHTML = `<i class="fas fa-sign-out-alt"></i> <span>Marcar SALIDA</span>`;
 
-            // Si no hay GPS activo, NUNCA se prenderán los botones
-            if (!latitudActual) {
-                return; 
-            }
+            // SEGURIDAD: Solo prende botones si el GPS mandó ubicación
+            if (!latitudActual) return; 
 
             gpsStatus.className = "mb-6 p-3 bg-green-50 border border-green-200 text-green-700 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
             gpsStatus.innerHTML = '<i class="fas fa-map-marker-alt text-lg"></i> <span>Ubicación lista. Ya puedes registrarte.</span>';
 
             if (dniVal.length === 8 && colaboradoresDB[dniVal]) {
-                
                 const registrosDelTecnico = cacheRegistrosGenerales.filter(r => String(r.dni).padStart(8, '0') === dniVal);
                 let bloqueadoPorTiempo = false;
                 let minRestantes = 0;
 
-                try {
-                    if (registrosDelTecnico.length > 0) {
-                        const ultimoRegistro = registrosDelTecnico[registrosDelTecnico.length - 1];
-                        const fechaUltimo = parseFechaHora(ultimoRegistro.fecha, ultimoRegistro.hora);
-                        const ahora = new Date();
-                        
-                        const diffMs = ahora - fechaUltimo;
-                        const diffMins = Math.floor(diffMs / 60000);
+                if (registrosDelTecnico.length > 0) {
+                    const ultimoRegistro = registrosDelTecnico[registrosDelTecnico.length - 1];
+                    const fechaUltimo = parseFechaHora(ultimoRegistro.fecha, ultimoRegistro.hora);
+                    const ahora = new Date();
+                    
+                    const diffMs = ahora - fechaUltimo;
+                    const diffMins = Math.floor(diffMs / 60000);
 
-                        if (diffMins < 10 && diffMins >= 0) {
-                            bloqueadoPorTiempo = true;
-                            minRestantes = 10 - diffMins;
-                        }
+                    if (diffMins < 10 && diffMins >= 0) {
+                        bloqueadoPorTiempo = true;
+                        minRestantes = 10 - diffMins;
                     }
-                } catch(e) {}
+                }
 
                 if (bloqueadoPorTiempo) {
                     gpsStatus.className = "mb-6 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
@@ -371,7 +362,6 @@
             }
         }
 
-        // 🛡️ SOLUCIÓN: TABLA A PRUEBA DE ERRORES DE EXCEL
         function renderizarTabla() {
             const tbody = document.getElementById('tabla-marcaciones-hoy');
             tbody.innerHTML = '';
@@ -390,16 +380,8 @@
                 const esIngreso = String(item.tipo).toLowerCase().trim() === "ingreso";
                 const badgeColor = esIngreso ? "bg-green-100 text-green-700 border-green-200" : "bg-red-100 text-red-700 border-red-200";
                 
-                // Inteligencia para adaptar la información si el Excel tiene columnas mezcladas
-                let dirTexto = item.direccion || item.latitud || "Ubicación GPS registrada";
-                let linkMapa = item.gpsLink || item.longitud || '#';
-                
-                if (String(dirTexto).includes('Mozilla') || String(dirTexto).includes('Chrome')) {
-                    dirTexto = item.latitud || "Ubicación registrada"; 
-                }
-                if (!String(linkMapa).startsWith('http')) {
-                    linkMapa = (item.latitud && item.longitud) ? `https://www.google.com/maps?q=${item.latitud},${item.longitud}` : '#';
-                }
+                let dirTexto = item.direccion || "Ubicación registrada";
+                let linkMapa = item.gpsLink || '#';
 
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50 transition";
@@ -419,7 +401,6 @@
             fetch(URL_API + '?nocache=' + new Date().getTime())
                 .then(res => res.json())
                 .then(data => {
-                    // Por si Google manda un error en vez de una lista
                     if(!Array.isArray(data)) data = [];
                     cacheRegistrosGenerales = data; 
                     verificarBotones(); 
@@ -427,13 +408,14 @@
                 })
                 .catch(err => {
                     console.error("Fallo al descargar", err);
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold"><i class="fas fa-exclamation-triangle"></i> Error al conectar con el servidor.</td></tr>`;
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold"><i class="fas fa-exclamation-triangle"></i> Error conectando al servidor.</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
         setInterval(cargarMarcacionesHoy, 20000);
 
+        // ENVÍO DE DATOS SEGURO (Muestra carga y luego espera el OK de Google)
         function registrar(tipo) {
             const inputDni = document.getElementById('dni');
             const inputNombre = document.getElementById('nombre');
@@ -444,8 +426,8 @@
             const btnSalida = document.getElementById('btn-salida');
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             
-            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Enviando...</span>`;
-            
+            // Botón en modo carga
+            btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Guardando en Excel...</span>`;
             btnIngreso.disabled = true; btnSalida.disabled = true;
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
@@ -457,26 +439,24 @@
                 latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
             };
 
-            // Mostrar éxito al instante
-            document.getElementById('mensaje-exito').classList.remove('hidden');
-            
-            cacheRegistrosGenerales.push({
-                tipo: payload.tipo, dni: payload.dni, nombre: payload.nombre,
-                fecha: payload.fecha, hora: payload.hora, direccion: payload.direccion,
-                gpsLink: `https://www.google.com/maps?q=${payload.latitud},${payload.longitud}`
+            // Envío normal, seguro y blindado
+            fetch(URL_API, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
+                body: JSON.stringify(payload) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('mensaje-exito').classList.remove('hidden');
+                inputDni.value = ""; inputNombre.value = ""; 
+                inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
+                setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
+                
+                cargarMarcacionesHoy(); // Refresca todo automáticamente
+            }).catch(e => { 
+                alert("Hubo un error de conexión, por favor intenta presionar Marcar nuevamente."); 
+                verificarBotones(); // Desbloquea si hay error
             });
-
-            inputDni.value = ""; inputNombre.value = ""; 
-            inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
-            
-            verificarBotones(); 
-            renderizarTabla();  
-
-            setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 4000);
-
-            // Envío silencioso
-            fetch(URL_API, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload) })
-            .catch(e => console.log("Guardado localmente"));
         }
 
         function abrirModalAdmin() { document.getElementById('modal-admin').classList.remove('hidden'); }
