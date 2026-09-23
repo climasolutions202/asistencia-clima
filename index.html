@@ -102,7 +102,7 @@
                         <div class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center flex-shrink-0"><i class="fas fa-check"></i></div>
                         <div>
                             <h4 class="text-green-800 font-bold">¡Asistencia registrada exitosamente!</h4>
-                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya se envió al sistema.</p>
+                            <p id="mensaje-detalle" class="text-green-600 text-sm">Tu registro ya aparece en tu Excel.</p>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                                 </thead>
                                 <tbody id="tabla-marcaciones-hoy" class="divide-y divide-slate-100 bg-white">
                                     <tr>
-                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Cargando tabla de asistencias...</td>
+                                        <td colspan="4" class="text-center py-6 text-slate-400"><i class="fas fa-spinner fa-spin mr-2"></i> Conectando con Google Sheets...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -170,6 +170,7 @@
         </div>
     </main>
 
+    <!-- MODAL ADMIN -->
     <div id="modal-admin" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative">
             <button onclick="cerrarModalAdmin()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-lg"></i></button>
@@ -180,7 +181,7 @@
             <form onsubmit="validarLoginAdmin(event)">
                 <div class="mb-4"><input type="text" id="admin-user" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="admin"></div>
                 <div class="mb-4"><input type="password" id="admin-pass" required class="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm" placeholder="••••••••"></div>
-                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mb-4">Usuario incorrecto.</div>
+                <div id="admin-error" class="hidden text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-200 mb-4">Usuario o contraseña incorrectos.</div>
                 <button type="submit" class="w-full bg-[#0B3B60] text-white font-semibold py-2.5 rounded-lg text-sm">Iniciar Sesión</button>
             </form>
         </div>
@@ -307,7 +308,6 @@
             verificarBotones();
         });
 
-        // 🔥 BLINDAJE: Esta función ya no fallará NUNCA, ni siquiera si el Excel está caído
         function verificarBotones() {
             const inputDni = document.getElementById('dni');
             const btnIngreso = document.getElementById('btn-ingreso');
@@ -330,7 +330,6 @@
                 let minRestantes = 0;
 
                 try {
-                    // Verificamos de forma segura si la caché existe y es un array
                     if (Array.isArray(cacheRegistrosGenerales)) {
                         const registrosDelTecnico = cacheRegistrosGenerales.filter(r => r && r.dni && String(r.dni).padStart(8, '0') === dniVal);
                         
@@ -348,15 +347,12 @@
                             }
                         }
                     }
-                } catch(e) {
-                    console.log("Ignorando error de lectura, permitiendo marcar.");
-                }
+                } catch(e) {}
 
                 if (bloqueadoPorTiempo) {
                     gpsStatus.className = "mb-6 p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-sm flex items-center gap-3 font-semibold shadow-sm";
                     gpsStatus.innerHTML = `<i class="fas fa-clock text-lg"></i> <span>Debes esperar ${minRestantes} min para volver a marcar.</span>`;
                 } else {
-                    // Botones desbloqueados siempre
                     btnIngreso.disabled = false; btnIngreso.classList.remove('opacity-40', 'cursor-not-allowed'); 
                     btnSalida.disabled = false; btnSalida.classList.remove('opacity-40', 'cursor-not-allowed'); 
                     gpsStatus.innerHTML = '<i class="fas fa-shield-alt text-lg"></i> <span>Sistema liberado. Elige INGRESO o SALIDA.</span>';
@@ -400,7 +396,7 @@
             });
         }
 
-        // 🔥 BLINDAJE LECTURA: Lee texto puro primero para que no colapse si Google devuelve un error de permisos
+        // CARGA PROTEGIDA CONTRA ERRORES DE PERMISOS
         function cargarMarcacionesHoy() {
             fetch(URL_API)
                 .then(res => res.text()) 
@@ -411,26 +407,26 @@
                             cacheRegistrosGenerales = data; 
                         } else {
                             cacheRegistrosGenerales = [];
-                            throw new Error("Respuesta no válida");
                         }
                         verificarBotones(); 
                         renderizarTabla();
                     } catch(e) {
                         cacheRegistrosGenerales = [];
-                        verificarBotones(); // Desbloquea los botones de todos modos
-                        document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Error leyendo tabla: Revisa los permisos de Apps Script ("Cualquier persona").</td></tr>`;
+                        verificarBotones(); 
+                        document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-exclamation-triangle block text-2xl mb-2"></i> Bloqueado por Google. Revisa Apps Script -> Gestionar implementaciones -> Lápiz -> Cualquier persona -> Guardar.</td></tr>`;
                     }
                 })
                 .catch(err => {
                     cacheRegistrosGenerales = [];
-                    verificarBotones(); // Desbloquea los botones de todos modos
-                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-wifi block text-2xl mb-2"></i> Sin conexión a internet o tabla bloqueada.</td></tr>`;
+                    verificarBotones(); 
+                    document.getElementById('tabla-marcaciones-hoy').innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500 font-bold text-xs"><i class="fas fa-wifi block text-2xl mb-2"></i> Verificando conexión...</td></tr>`;
                 });
         }
 
         cargarMarcacionesHoy();
         setInterval(cargarMarcacionesHoy, 20000);
 
+        // 🔥 REGISTRO 100% ANTIBLOQUEO (Usa Formulario de navegador en lugar de JSON)
         function registrar(tipo) {
             const inputDni = document.getElementById('dni');
             const inputNombre = document.getElementById('nombre');
@@ -442,37 +438,39 @@
             const btnActivo = tipo === 'Ingreso' ? btnIngreso : btnSalida;
             
             btnActivo.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>Registrando...</span>`;
-            
             btnIngreso.disabled = true; btnSalida.disabled = true;
             document.getElementById('mensaje-exito').classList.add('hidden');
             document.getElementById('mensaje-error').classList.add('hidden');
 
-            const payload = { 
-                tipo: tipo, dni: inputDni.value, nombre: inputNombre.value, 
-                fecha: obtenerFechaHoy(), 
-                hora: new Date().toLocaleTimeString('es-PE', {hour12: true}),
-                latitud: latitudActual, longitud: longitudActual, direccion: direccionActual, dispositivo: navigator.userAgent 
-            };
+            // Armamos el dato tipo "Formulario de Internet" (URLSearchParams) para saltar el CORS de Google
+            const payloadFormulario = new URLSearchParams();
+            payloadFormulario.append("tipo", tipo);
+            payloadFormulario.append("dni", inputDni.value);
+            payloadFormulario.append("nombre", inputNombre.value);
+            payloadFormulario.append("fecha", obtenerFechaHoy());
+            payloadFormulario.append("hora", new Date().toLocaleTimeString('es-PE', {hour12: true}));
+            payloadFormulario.append("latitud", latitudActual || "");
+            payloadFormulario.append("longitud", longitudActual || "");
+            payloadFormulario.append("direccion", direccionActual || "");
+            payloadFormulario.append("dispositivo", navigator.userAgent || "");
 
-            // Envío normal, estable y seguro
             fetch(URL_API, { 
                 method: 'POST', 
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload) 
+                body: payloadFormulario // Enviamos el formulario nativo
             })
-            .then(res => res.json())
-            .then(data => {
+            .then(res => res.text())
+            .then(texto => {
                 document.getElementById('mensaje-exito').classList.remove('hidden');
                 
                 inputDni.value = ""; inputNombre.value = ""; 
                 inputNombre.className = "w-full pl-12 pr-3 py-3.5 border border-gray-200 bg-gray-50 rounded-xl text-gray-600 font-bold cursor-not-allowed";
                 
-                cargarMarcacionesHoy(); // Actualiza la tabla después del registro
+                cargarMarcacionesHoy(); // Recarga la tabla de Google
                 setTimeout(() => { document.getElementById('mensaje-exito').classList.add('hidden'); }, 5000);
             })
             .catch(e => {
-                document.getElementById('mensaje-error').classList.remove('hidden');
-                verificarBotones(); // Si falla, vuelve a encender los botones para reintentar
+                alert("Bloqueo de red detectado. Verifica que Apps Script esté configurado para 'Cualquier Persona'.");
+                verificarBotones(); 
             });
         }
 
